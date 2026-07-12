@@ -1,0 +1,62 @@
+
+===================== GATE A REPORT =====================
+
+[A1] prices-history coverage (>=5 points), by year:
+  2024: 93% (64/69)   fidelity used: {1440: 69}
+  2025: 99% (68/69)   fidelity used: {1440: 68, 720: 1}
+  2026: 100% (69/69)   fidelity used: {1440: 69}
+  by volume tercile: T1: 94% (65/69)  T2: 97% (67/69)  T3: 100% (69/69)
+  history start lag vs market start (days): median 0, p90 0
+
+[A2] resolution concordance:
+  degenerate outcomePrices (>=0.99): 100% (207/207)
+  price series reaches resolution (+-3d of umaEndDate): 99% (199/201)
+  last price agrees with winner (+-0.05): 85% (176/207)
+  token-inversion suspects (|last_p - winner| >= 0.9): 0/31 mismatches
+    - 2024 last_p=0.07 -> winner=0  early=False  hist_gap_d=0.3  | marginfi airdrop by March 1?
+    - 2024 last_p=0.51 -> winner=1  early=False  hist_gap_d=0.9  | Mohamed Deif still in Hamas leadership through March 1?
+    - 2024 last_p=0.48 -> winner=0  early=False  hist_gap_d=0.3  | $SPX6900 all time high by Jan 31?
+    - 2024 last_p=0.14 -> winner=1  early=True  hist_gap_d=0.9  | Claudine Gay out as Harvard President by Jan 15?
+    - 2024 last_p=0.10 -> winner=0  early=False  hist_gap_d=0.3  | Blast airdrop by May?
+    - 2024 last_p=0.59 -> winner=1  early=False  hist_gap_d=0.2  | 49ers vs. Lions
+    - 2024 last_p=0.07 -> winner=0  early=False  hist_gap_d=0.3  | Taylor Swift pregnant before March?
+    - 2024 last_p=0.16 -> winner=0  early=False  hist_gap_d=0.7  | Will DPP (民進黨) win a majority in the 2024 Taiwanese General 
+    - 2024 last_p=0.66 -> winner=0  early=False  hist_gap_d=0.5  | Will Trump win the South Carolina Primary by between 30-40% 
+    - 2024 last_p=0.55 -> winner=0  early=True  hist_gap_d=1.0  | Will Reddit IPO at between $5b-7.5b valuation?
+    - 2024 last_p=0.42 -> winner=0  early=True  hist_gap_d=0.3  | Will the Detroit Lions win Super Bowl LVIII?
+    - 2024 last_p=0.10 -> winner=0  early=False  hist_gap_d=0.2  | Will Paul Giamatti win the Oscar for Best Actor?
+    - 2024 last_p=0.42 -> winner=0  early=False  hist_gap_d=0.8  | Will Kamala Harris win the 2024 US Presidential Election?
+    - 2024 last_p=0.58 -> winner=1  early=False  hist_gap_d=0.6  | Who will get more votes in Taiwan Election: Hou Yu-ih (侯友宜) 
+    - 2024 last_p=0.06 -> winner=0  early=False  hist_gap_d=0.3  | Will Dallas Mavericks be 2023-24 NBA Champions?
+    - 2025 last_p=0.20 -> winner=0  early=True  hist_gap_d=0.8  | Will Labour win 375-399 seats in the next UK Election?
+    - 2025 last_p=0.12 -> winner=0  early=True  hist_gap_d=0.8  | Will FWOG be the first Pump.fun coin to $1b?
+    - 2025 last_p=0.75 -> winner=0  early=False  hist_gap_d=0.9  | Will Newcastle United finish in the top 4 of EPL?
+    - 2025 last_p=0.51 -> winner=1  early=False  hist_gap_d=0.4  | Will another player be the top Fantasy Tight End?
+    - 2025 last_p=0.31 -> winner=0  early=True  hist_gap_d=0.2  | Will the Ravens win the AFC Championship?
+    - 2025 last_p=0.06 -> winner=0  early=True  hist_gap_d=0.3  | Will the Boston Celtics win the 2025 NBA Finals?
+    - 2026 last_p=0.06 -> winner=0  early=False  hist_gap_d=0.3  | Will Benson Boone perform during the Super Bowl LX halftime 
+    - 2026 last_p=0.07 -> winner=0  early=True  hist_gap_d=0.4  | Will TreVeyon Henderson record the most rushing yards by a r
+    - 2026 last_p=0.07 -> winner=0  early=False  hist_gap_d=0.2  | Will Ed Sheeran perform during the Super Bowl LX halftime sh
+    - 2026 last_p=0.83 -> winner=1  early=True  hist_gap_d=0.3  | Will the Chicago Bears win the NFC North?
+    - 2026 last_p=0.06 -> winner=0  early=True  hist_gap_d=0.3  | Will the Chargers win the AFC Championship?
+    - 2026 last_p=0.06 -> winner=0  early=True  hist_gap_d=0.1  | Will the Detroit Lions make the playoffs?
+    - 2026 last_p=0.09 -> winner=0  early=True  hist_gap_d=0.3  | Will the Ravens win the AFC Championship?
+    - 2026 last_p=0.35 -> winner=1  early=True  hist_gap_d=0.3  | Will the Pittsburgh Steelers make the playoffs?
+    - 2026 last_p=0.13 -> winner=0  early=True  hist_gap_d=0.3  | Will the Los Angeles Rams win the NFC West?
+    - 2026 last_p=0.21 -> winner=0  early=True  hist_gap_d=0.4  | Will Georgia win the 2026 College Football National Champion
+  resolution-ish fields seen: [('umaResolutionStatus', 207), ('closedTime', 207), ('umaResolutionStatuses', 207)]
+
+[A3] actual resolution (umaEndDate) vs scheduled endDate:
+  2024: early 29% (20/69)   late 32% (22/69)
+  2025: early 83% (57/69)   late 0% (0/69)
+  2026: early 74% (51/69)   late 3% (2/69)
+  among early resolvers, days early: median 45, p90 206
+
+[A4] operational:
+  calls: {'gamma-api.polymarket.com': 15, 'clob.polymarket.com': 208}   http errors: none
+  elapsed: 117s  ->  ~1.9 req/s sustained
+  feesEnabled field present: 100% (207/207)
+
+[DECISION] per plan §3/W0:
+  coverage 97% >= 90%  ->  GO. Proceed to W1.
+=========================================================

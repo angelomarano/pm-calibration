@@ -1,0 +1,11 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Data — regenerable via ingestion scripts, never committed
+data/
+
+# OS
+.DS_Store
