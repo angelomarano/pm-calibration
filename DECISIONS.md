@@ -106,3 +106,26 @@ days early relative to their own lifespan. P2 (deadline-anchored panel)
 is confirmed globally exploratory per the plan §6 contingency, no
 per-category reinstatement. P1 (calendar panel) is the sole primary
 design, as decided 2026-07-09.
+
+2026-07-13 — Gate C (M3e): investigated missing_price (8.49% of P1
+candidate pairs, 8,896/104,795). Initial hypothesis was that this
+overlapped substantially with M2's 1,072-market unexplained-price gap
+(2026-07-13 entry) given a similar surface pattern (Sports-heavy,
+2026-skewed). Quantified rather than assumed: only 1.0% (85/8,896)
+actually trace to that known gap — hypothesis rejected. Real cause: 75.9%
+of missing_price rows have no CLOB price point before the snapshot date
+at all (monthly snapshots landing close to a market's creation, before
+enough trading history accumulates), and 24.1% have a point that exceeds
+the 72h staleness bound (median 96h, max 120h — modest sparse-trading
+gaps). Concentration by category (Sports 10.2% vs Politics 5.5%) and year
+(3.8% in 2024 -> 10.8% in 2026) reflects the panel-eligible population's
+own growth skew (Gate B), not a data-quality defect. No action needed —
+expected behavior of monthly snapshots against a growing, unevenly-aged
+market population.
+
+Category x is_oos counts (Gate C) all clear the ~200/cell calibration
+target on non-OOS rows (smallest: Other at 1,708). W2 watch-item, not a
+blocker: if horizon/vol_tercile sub-splitting shrinks the smaller
+categories (Other, Geopolitics, Crypto) further, headroom there is much
+tighter than Politics/Sports — revisit once that cell structure is
+decided.
