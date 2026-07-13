@@ -1,0 +1,66 @@
+===================== GATE C REPORT =====================
+
+[1] row uniqueness: 95899 rows, 0 duplicate (market_id, snapshot_date) pairs
+
+[2] y-per-market-constant: 0 markets with inconsistent y across snapshots (expect 0)
+
+[3] missing_price / staleness distribution:
+  candidates=104795  kept=95899  missing_price=8896 (8.49%)
+
+  missing_price share by category:
+    Sports           4854/47456   (10.2%)
+    Geopolitics       805/8229    (9.8%)
+    Crypto            646/6614    (9.8%)
+    Other             301/3795    (7.9%)
+    Culture           657/9222    (7.1%)
+    Econ/Finance      521/9297    (5.6%)
+    Politics         1112/20182   (5.5%)
+
+  missing_price share by snapshot year:
+    2024:    453/11986   (3.8%)
+    2025:   3171/44026   (7.2%)
+    2026:   5272/48783   (10.8%)
+
+  M2-unexplained-gap overlap: 85/8896 missing_price rows (1.0%) trace to a market already known (M2, 2026-07-13 DECISIONS.md entry) to have zero CLOB history at any fidelity.
+  -> minority explained by the known M2 gap. The dominant cause is NOT the same gap propagating downstream — see the no-point-vs-stale split below for the real cause.
+
+  of the 8896 missing_price rows: 6752 (75.9%) have no price point before the snapshot at all; 2144 (24.1%) have a point but it exceeds the 72h staleness bound.
+    stale-point age: median=96h  p90=120h  max=120h
+
+[4] is_oos split:
+  is_oos=False: 52388 (54.6%)
+  is_oos=True: 43511 (45.4%)
+  6/30 snapshot dates are OOS by calendar, but the eligible population skews hard toward 2025-2026 (Gate B) -> OOS rows are a larger share of the panel than of the snapshot grid.
+
+  category x is_oos counts:
+    Crypto         is_oos=False  4142
+    Crypto         is_oos=True   1826
+    Culture        is_oos=False  5237
+    Culture        is_oos=True   3328
+    Econ/Finance   is_oos=False  4733
+    Econ/Finance   is_oos=True   4043
+    Geopolitics    is_oos=False  4000
+    Geopolitics    is_oos=True   3424
+    Other          is_oos=False  1708
+    Other          is_oos=True   1786
+    Politics       is_oos=False  13750
+    Politics       is_oos=True   5320
+    Sports         is_oos=False  18818
+    Sports         is_oos=True   23784
+
+  non-OOS (W2 input population) by category, vs the ~200/cell target:
+    Other          1708
+    Geopolitics    4000
+    Crypto         4142
+    Econ/Finance   4733
+    Culture        5237
+    Politics       13750
+    Sports         18818
+  -> all categories comfortably above 200 on non-OOS rows. If W2 further splits by horizon/vol_tercile, the smaller categories (Other, Geopolitics, Crypto) have much less headroom than Politics/Sports — worth watching once that cell structure is decided.
+
+[5] load_panel() integration check:
+  load_panel(p1.parquet) rows: 52388  (matches is_oos=False count above: YES)
+  duplicates via loader: 0
+  allow_oos=True: raised RuntimeError as expected (OOS lock is active (config/spec.yaml oos_locked=true) — allow_oos=True cannot bypass it; flip oos_locked to false first.)
+
+=========================================================
