@@ -4,3 +4,4 @@ pyarrow==19.0.0
 pytest==8.3.4
 polars==1.42.1
 duckdb
+pyyaml==6.0.2

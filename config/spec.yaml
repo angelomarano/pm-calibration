@@ -1,0 +1,12 @@
+snapshot_dates:
+  start: "2024-01-01T00:00:00Z"
+  end: "2026-06-01T00:00:00Z"
+  freq: "monthly_first" # 1st of month, 00:00 UTC
+
+p2_horizons_days: [7, 30] # exploratory only, per 2026-07-13 Gate B closure
+
+staleness_max_hours: 72
+price_clip: [0.01, 0.99]
+
+oos_locked: true
+oos_boundary: "2026-01-01T00:00:00Z"
