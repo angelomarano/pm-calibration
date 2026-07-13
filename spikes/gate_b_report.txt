@@ -1,0 +1,110 @@
+===================== GATE B REPORT =====================
+markets.parquet: 331035 rows
+
+[1] rows by category x year (design breakdown DEFERRED — no P1/P2 panel yet, M3 not built):
+  Crypto         2024: 866
+  Crypto         2025: 42357
+  Crypto         2026: 109987
+  Crypto         2027: 491
+  Crypto         2028: 123
+  Culture        2024: 1153
+  Culture        2025: 4437
+  Culture        2026: 5623
+  Culture        2027: 7
+  Econ/Finance   2024: 390
+  Econ/Finance   2025: 2646
+  Econ/Finance   2026: 5055
+  Econ/Finance   2027: 23
+  Geopolitics    2024: 388
+  Geopolitics    2025: 2286
+  Geopolitics    2026: 3160
+  Geopolitics    2027: 3
+  Other          2024: 324
+  Other          2025: 4273
+  Other          2026: 19505
+  Other          2027: 54
+  Politics       2024: 3207
+  Politics       2025: 4594
+  Politics       2026: 3506
+  Politics       2027: 10
+  Sports         2024: 3210
+  Sports         2025: 29801
+  Sports         2026: 83545
+  Sports         2027: 11
+
+distinct events: 203087
+markets-per-event: median=1  p90=3  max=94  (events with >1 market: 34768/203087)
+
+[2] base rate of y (share y==1 among non-ambiguous), by category:
+  Crypto         base_rate=46.5%  n=153801
+  Culture        base_rate=18.5%  n=11214
+  Econ/Finance   base_rate=37.4%  n=8109
+  Geopolitics    base_rate=27.1%  n=5832
+  Other          base_rate=21.4%  n=24149
+  Politics       base_rate=29.1%  n=11313
+  Sports         base_rate=43.1%  n=115460
+
+base rate of y by year:
+  2024: base_rate=31.9%  n=9519
+  2025: base_rate=39.3%  n=90246
+  2026: base_rate=42.5%  n=229392
+  2027: base_rate=37.0%  n=598
+  2028: base_rate=47.2%  n=123
+
+[3] duplicates:
+  duplicate market_id: 0  (build_markets_table raises if any survive parsing)
+  missing_price / staleness distributions: DEFERRED — snapshot-level concepts, need M3's panel
+
+[4 (FULL POPULATION, 331,035 markets — diluted by ~72% panel-ineligible)] early-resolution share per category:
+  early = resolution_ts < end_date_sched by more than 2 days
+  Crypto         early=1.4%    n=153783   days_early: median=31 p90=367
+  Culture        early=27.0%   n=11219    days_early: median=14 p90=104
+  Econ/Finance   early=12.9%   n=8111     days_early: median=20 p90=228
+  Geopolitics    early=33.0%   n=5837     days_early: median=21 p90=305
+  Other          early=3.2%    n=24153    days_early: median=20 p90=247
+  Politics       early=21.6%   n=11316    days_early: median=44 p90=270
+  Sports         early=21.6%   n=116565   days_early: median=7 p90=14
+
+  categories with early share < 15%: ['Crypto', 'Econ/Finance', 'Other']
+  -> NOT the number that decides P2's fate; see the panel-eligible-only table below.
+
+[4 (PANEL-ELIGIBLE ONLY, 94,442 markets — this is what actually decides P2's fate)] early-resolution share per category:
+  early = resolution_ts < end_date_sched by more than 2 days
+  Crypto         early=36.2%   n=4934     days_early: median=63 p90=379
+  Culture        early=39.8%   n=7015     days_early: median=18 p90=108
+  Econ/Finance   early=20.9%   n=4741     days_early: median=23 p90=231
+  Geopolitics    early=39.9%   n=4574     days_early: median=23 p90=310
+  Other          early=32.3%   n=2260     days_early: median=22 p90=248
+  Politics       early=30.1%   n=7897     days_early: median=47 p90=270
+  Sports         early=39.8%   n=63015    days_early: median=7 p90=14
+
+  categories with early share < 15%: NONE
+  -> no category clears the 15% bar even restricted to eligible markets; P2 stays exploratory.
+
+[5] M2 recap (from the full run, 2026-07-13):
+  panel_eligible markets: 94,442 (28.5% of 331,035)
+  coverage: 98.86%  (bar >=95%: PASS)
+  amm_era: 0
+  unexplained: 1,072 (1.135%)  (bar <1%: FAIL — see DECISIONS.md 2026-07-13 entry for the investigation trail)
+  gaps (persistent per-token failures): 0
+
+[6] spot-checks:
+  2024 US presidential-election market present: YES (n=28)
+    - $ 1,531,479,285  y=1  Will Donald Trump win the 2024 US Presidential Election?
+    - $ 1,037,039,118  y=0  Will Kamala Harris win the 2024 US Presidential Election?
+    - $   241,655,100  y=0  Will any other Republican Politician win the 2024 US Presidential Election?
+  mid-2024 (June) snapshot prices: n=28673  range=[0.001, 1.000]  (plausible: within [0,1])
+
+  top-10 markets by volume:
+    $ 1,531,479,285  Politics     | Will Donald Trump win the 2024 US Presidential Election?
+    $ 1,037,039,118  Politics     | Will Kamala Harris win the 2024 US Presidential Election?
+    $   400,409,527  Politics     | Will Donald Trump be inaugurated?
+    $   378,011,507  Sports       | Will the Sacramento Kings win the 2025 NBA Finals?
+    $   375,813,105  Crypto       | MicroStrategy sells any Bitcoin by May 31, 2026?
+    $   326,507,671  Other        | Will Nicolae Ciucă win the 2024 Romanian Presidential election?
+    $   269,049,107  Geopolitics  | US forces enter Iran by April 30?
+    $   242,231,180  Other        | Will Zelenskyy wear a suit before July?
+    $   241,655,100  Politics     | Will any other Republican Politician win the 2024 US Presidential Elec
+    $   235,065,167  Econ/Finance | Fed decreases interest rates by 50+ bps after January 2026 meeting?
+
+=========================================================

@@ -67,3 +67,42 @@ to data/raw/gamma/_gaps.jsonl and continues rather than blocking the whole
 pull. Accepted as a bounded, documented undercount affecting 2 of ~24
 study months; no re-pull attempted (retrying the identical cursor is known
 not to work).
+
+2026-07-13 — Full M2 run (94,442 panel-eligible markets, 11.33h runtime,
+0 gaps): coverage 98.86% (bar >=95%, pass), but unexplained share 1.135%
+(bar <1%, fail) — 1,072 markets with zero price history at either
+fidelity, live-verified, not amm_era (enable_order_book=True,
+volume_clob≈volume_num). Concentrated: 90.7% Sports, 98.2% with 2026
+end_date_sched, all above-median volume (p50 $89k vs $60.8k overall),
+100% already uma_resolution_status=="resolved". Root cause unconfirmed
+after a 4-round live investigation: (1) fresh /prices-history refetch,
+cache bypassed — still empty, not a caching artifact; (2) fresh Gamma
+market lookup by market_id on 5 affected markets — clobTokenIds and
+conditionId match our stored values exactly, negRisk/negRiskOther both
+False, no token migration or reissuance signal; (3) CLOB /book endpoint
+— 404 on all 5, but a control token that DOES have price history also
+404s post-resolution, so this is normal teardown behavior, not
+diagnostic; (4) date-clustering check against the known 2026-02-18
+(sports taker fees) and 2026-03-30 (Fee Structure V2) rollout dates — no
+clean clustering, 2/5 sampled markets predate both changes by ~a year;
+(5) full raw top-level-field diff between the 5 affected markets and 5
+matched controls (same category/volume range/2026 dates, WITH history) —
+no field showed a confident systematic split; a few (comboStatus,
+secondsDelay, customLiveness) showed soft directional skew at n=5 per
+group but no plausible causal link to missing price history and no
+statistical confidence at that sample size. Accepted as a bounded,
+documented gap (1.14% of panel-eligible markets) — same treatment as the
+M1 pagination gaps — rather than pursuing further investigation; 1.14%
+vs. a 1% bar did not warrant more time than this five-round check.
+
+Gate B (2026-07-13): panel-eligible-only early-resolution share (the
+population that could actually appear in P1/P2) shows every category
+at or above ~21%, none below the 15% bar — including Econ/Finance
+(20.9% eligible-only vs 12.9% on the full population, the wrong
+direction for the macro/Fed-resolves-on-schedule hypothesis raised at
+Gate A). The full-population table was misleading: diluted by
+structurally short-lived markets that mechanically cannot resolve >2
+days early relative to their own lifespan. P2 (deadline-anchored panel)
+is confirmed globally exploratory per the plan §6 contingency, no
+per-category reinstatement. P1 (calendar panel) is the sole primary
+design, as decided 2026-07-09.
