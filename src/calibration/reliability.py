@@ -53,6 +53,16 @@ def wilson_interval(successes: int, n: int, z: float = 1.96) -> tuple[float, flo
     return (max(0.0, center - half_width), min(1.0, center + half_width))
 
 
+def assign_bin_index(p: np.ndarray, edges: list[float] = DECILE_EDGES) -> np.ndarray:
+    """Bin index per value of p: left-closed/right-open
+    ([edges[i], edges[i+1])), except the last bin, closed on both ends
+    ([edges[-2], edges[-1]]). Shared by bin_reliability (W2b) and the
+    Murphy decomposition (W2c, src/calibration/murphy.py) -- both need
+    the exact same binning convention, not just the same edge list."""
+    interior = np.array(edges[1:-1])
+    return np.searchsorted(interior, p, side="right")
+
+
 def bin_reliability(df: pl.DataFrame, edges: list[float] = DECILE_EDGES) -> pl.DataFrame:
     """Per decile bin: n, mean_p, empirical_freq (share y==1), wilson_low,
     wilson_high. Bins are left-closed/right-open ([edges[i], edges[i+1])),
@@ -61,8 +71,7 @@ def bin_reliability(df: pl.DataFrame, edges: list[float] = DECILE_EDGES) -> pl.D
     p = df["p"].to_numpy()
     y = df["y"].to_numpy().astype(float)
     n_bins = len(edges) - 1
-    interior = np.array(edges[1:-1])
-    bin_idx = np.searchsorted(interior, p, side="right")
+    bin_idx = assign_bin_index(p, edges)
 
     rows = []
     for b in range(n_bins):
