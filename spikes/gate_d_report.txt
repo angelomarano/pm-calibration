@@ -1,0 +1,87 @@
+===================== GATE D REPORT =====================
+
+[0] HEADLINE
+  Pooled ex-Sports: beta=1.165, 95% CI [1.116, 1.224] (excludes 1.0)
+  -- IN-SAMPLE, DESCRIPTIVE ONLY. Whether this is signal or a design artifact
+is what W3's reconciliation grid tests; whether it survives net of costs is
+W4. This report is a sanity checkpoint, not a finding.
+
+[1] slopes finite & directionally sane:
+  all alpha/beta finite across 8 cells: PASS
+    ex_Sports    (PRIMARY  ) beta=1.165  n=33517
+    Sports       (SECONDARY) beta=0.999  n=18793
+    Crypto       (SECONDARY) beta=1.095  n=4096
+    Culture      (SECONDARY) beta=1.098  n=5237
+    Econ/Finance (SECONDARY) beta=1.353  n=4729
+    Geopolitics  (SECONDARY) beta=1.309  n=3997
+    Other        (SECONDARY) beta=1.172  n=1708
+    Politics     (SECONDARY) beta=1.146  n=13750
+
+  pooled ex-Sports beta=1.165 vs. bug-hunt bounds [0.3, 5.0]: PASS (comfortably inside the sane range, not near either bound)
+
+  horizon-tercile beta sequence (rising-with-horizon check), point + 95% CI:
+    Crypto:
+      tercile 1: beta=1.075 CI=[0.952, 1.268]  n_clusters=437
+      tercile 2: beta=1.005 CI=[0.876, 1.184]  n_clusters=353
+      tercile 3: beta=1.190 CI=[1.009, 1.417]  n_clusters=264
+      -> not monotonically rising
+    Geopolitics:
+      tercile 1: beta=1.120 CI=[0.985, 1.306]  n_clusters=798
+      tercile 2: beta=1.311 CI=[1.122, 1.601]  n_clusters=443
+      tercile 3: beta=1.584 CI=[1.268, 2.004]  n_clusters=260
+      -> directionally rising but CIs overlap -- noisy, not a robust pattern to cite standalone
+    Politics:
+      tercile 1: beta=1.192 CI=[1.100, 1.297]  n_clusters=1301
+      tercile 2: beta=1.061 CI=[0.962, 1.183]  n_clusters=759
+      tercile 3: beta=1.185 CI=[1.065, 1.340]  n_clusters=501
+      -> not monotonically rising
+    Sports:
+      tercile 1: beta=0.989 CI=[0.917, 1.067]  n_clusters=2505
+      tercile 2: beta=0.922 CI=[0.830, 1.030]  n_clusters=292
+      tercile 3: beta=0.919 CI=[0.790, 1.079]  n_clusters=204
+      -> not monotonically rising
+
+  pooled (no horizon split, per the cluster-floor policy): ['Culture', 'Econ/Finance', 'Other']
+
+[2] reliability curves (pooled ex-Sports):
+  binned empirical_freq monotonicity: 0 violation(s) across 10 non-empty bins (PASS -- allowing 1 for real-data noise)
+  mean abs deviation, isotonic fit vs. binned empirical_freq: 0.0134 (PASS)
+
+[3] BSS > 0 in most cells:
+  8/8 cells have BSS > 0: PASS
+    Sports         bss=0.290
+    Crypto         bss=0.383
+    Geopolitics    bss=0.442
+    Culture        bss=0.449
+    Other          bss=0.461
+    Econ/Finance   bss=0.502
+    ex_Sports      bss=0.520
+    Politics       bss=0.601
+
+[4] n vs the 200-cluster floor (reconciled against Gate C's 2026-07-13 report):
+    Crypto         Gate C non-OOS=4142     W2 kept=4096     diff=46
+    Culture        Gate C non-OOS=5237     W2 kept=5237     diff=0
+    Econ/Finance   Gate C non-OOS=4733     W2 kept=4729     diff=4
+    Geopolitics    Gate C non-OOS=4000     W2 kept=3997     diff=3
+    Other          Gate C non-OOS=1708     W2 kept=1708     diff=0
+    Politics       Gate C non-OOS=13750    W2 kept=13750    diff=0
+    Sports         Gate C non-OOS=18818    W2 kept=18793    diff=25
+  total diff=78 vs. dropped_total=78: PASS
+
+  cluster-floor pooled vs. split (per the 2026-07-22 DECISIONS.md entry):
+    pooled (< 200 clusters in thinnest tercile): ['Culture', 'Econ/Finance', 'Other']
+    split (>= 200 clusters in every tercile): ['Crypto', 'Geopolitics', 'Politics', 'Sports']
+
+[5] dropped-row accounting:
+  load_calibration_frame: {'loaded': 52388, 'dropped_null_y': 78, 'dropped_ambiguous': 78, 'dropped_total': 78, 'kept': 52310}
+  loaded=52388 vs. Gate C is_oos=False=52388: PASS
+
+=========================================================
+EXIT VERDICT
+  all checks: PASS -- W2 closes, W3 opens
+
+  Pooled ex-Sports: beta=1.165, 95% CI [1.116, 1.224] (excludes 1.0)
+  -- IN-SAMPLE, DESCRIPTIVE ONLY. Whether this is signal or a design artifact
+is what W3's reconciliation grid tests; whether it survives net of costs is
+W4. This report is a sanity checkpoint, not a finding.
+=========================================================
