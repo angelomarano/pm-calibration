@@ -111,3 +111,28 @@ def event_bootstrap(
         seed=seed,
         draws=draws if return_draws else None,
     )
+
+
+def n_clusters_per_cell(
+    df: pl.DataFrame,
+    group_cols: list[str],
+    cluster_col: str = "event_id",
+    id_col: str = "market_id",
+) -> pl.DataFrame:
+    """Distinct cluster count (coalesce(cluster_col, id_col), same
+    resampling unit event_bootstrap uses) per group_cols combination --
+    the correct denominator for judging whether a cell has enough
+    independent bootstrap units. Row count is not a reliable proxy for
+    this: confirmed empirically in W2d's horizon-tercile split, where
+    Sports has 18,793 rows total but its thinnest cell's cluster count is
+    only 204 (barely clearing a 200 floor), and Other/Econ-Finance/
+    Culture fail outright despite comfortable row counts -- a handful of
+    very long-lived markets contribute many repeated snapshot rows per
+    cluster, concentrated unevenly across whatever the cell's stratifying
+    dimension is. Needed again for W3's reconciliation grid, which
+    stratifies further still -- built here once, reused there."""
+    return (
+        df.with_columns(pl.col(cluster_col).fill_null(pl.col(id_col)).alias("_cluster_key"))
+        .group_by(group_cols)
+        .agg(pl.col("_cluster_key").n_unique().alias("n_clusters"))
+    )

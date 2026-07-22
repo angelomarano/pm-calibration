@@ -2,7 +2,7 @@ import numpy as np
 import polars as pl
 import pytest
 
-from src.inference.bootstrap import event_bootstrap
+from src.inference.bootstrap import event_bootstrap, n_clusters_per_cell
 
 
 def test_seed_reproducibility():
@@ -221,3 +221,33 @@ def test_nan_in_one_key_does_not_invalidate_other_keys_on_the_same_draw():
     assert result_both.point["always_ok"] == result_solo.point["always_ok"]
     assert result_both.ci_low["always_ok"] == result_solo.ci_low["always_ok"]
     assert result_both.ci_high["always_ok"] == result_solo.ci_high["always_ok"]
+
+
+def test_n_clusters_per_cell_counts_distinct_clusters_not_rows():
+    """Row count is not a reliable proxy for cluster count (W2d finding):
+    a group can have many rows from few clusters if some clusters repeat
+    many rows each."""
+    df = pl.DataFrame(
+        {
+            "group": ["a", "a", "a", "a", "a", "b", "b"],
+            "event_id": ["e1", "e1", "e1", "e1", "e2", "e3", None],
+            "market_id": ["m1", "m1", "m1", "m1", "m2", "m3", "m4"],
+        }
+    )
+    result = n_clusters_per_cell(df, group_cols=["group"])
+    counts = dict(zip(result["group"].to_list(), result["n_clusters"].to_list()))
+    assert counts["a"] == 2  # 5 rows, but only e1 and e2 as clusters
+    assert counts["b"] == 2  # e3, plus the orphan m4 (event_id null -> keyed by market_id)
+
+
+def test_n_clusters_per_cell_multi_group_cols():
+    df = pl.DataFrame(
+        {
+            "category": ["X", "X", "X", "Y"],
+            "tercile": [1, 1, 2, 1],
+            "event_id": ["e1", "e1", "e2", "e3"],
+            "market_id": ["m1", "m1", "m2", "m3"],
+        }
+    )
+    result = n_clusters_per_cell(df, group_cols=["category", "tercile"]).sort(["category", "tercile"])
+    assert result["n_clusters"].to_list() == [1, 1, 1]

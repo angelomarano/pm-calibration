@@ -129,3 +129,28 @@ blocker: if horizon/vol_tercile sub-splitting shrinks the smaller
 categories (Other, Geopolitics, Crypto) further, headroom there is much
 tighter than Politics/Sports — revisit once that cell structure is
 decided.
+
+2026-07-22 — W2d horizon-tercile planning: cluster count, not row count,
+is the binding constraint for any future stratification in this project.
+Checked all 7 categories' thinnest days_to_sched_end tercile (within-
+category qcut) by distinct-cluster count (event_id coalesced with
+market_id), not row count: Other (85 clusters), Econ/Finance (139), and
+Culture (192) all fail a 200-cluster floor outright despite comfortable
+row counts (569-1,660 rows in the failing cells) — a handful of very
+long-lived markets contribute many repeated snapshot rows per cluster,
+concentrated unevenly across horizon terciles. Sports clears the floor
+only barely (204 clusters) despite being the largest category by rows
+(18,793) and total clusters (2,680), for the same underlying reason.
+Geopolitics (260) and Crypto (264) clear comfortably enough to split but
+are noted as thin. Politics (501) is the only category with real margin.
+
+Mitigation: build_horizon_stratified_report checks n_clusters_per_cell
+(src/inference/bootstrap.py, now a shared utility) per category at
+runtime; any category whose thinnest tercile falls below 200 clusters
+gets one pooled row (role=SECONDARY_POOLED, with a note) instead of three
+unreliable sub-cells. n_clusters is reported in every row regardless, so
+degradation is visible rather than trusted blindly. This rule -- check
+cluster count, not row count, before trusting any stratified cell --
+applies to W3's reconciliation grid too (design x horizon x sample x
+period), which stratifies further still and will hit the same
+constraint, likely worse.
