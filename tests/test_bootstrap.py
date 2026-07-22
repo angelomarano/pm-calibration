@@ -193,3 +193,31 @@ def test_coverage_correct_cluster_bootstrap_vs_broken_row_level():
     assert correct_rate >= 0.85, f"correct cluster bootstrap undercovered: {correct_rate:.2%}"
     assert broken_rate <= 0.80, f"broken row-level bootstrap should undercover clearly, got {broken_rate:.2%}"
     assert correct_rate - broken_rate >= 0.15, "DGP should separate correct from broken, not just both pass"
+
+
+def test_nan_in_one_key_does_not_invalidate_other_keys_on_the_same_draw():
+    """Proves per-key independence in the CI loop: `for k in point: vals =
+    [d[k] for d in draws]` extracts each key's values across draws on its
+    own -- a nan in one key on a given draw must not affect another key's
+    value from that same draw. Needed for murphy_stat_fn (W2c), which
+    returns 6 keys per draw where bss can be nan (UNC=0) while
+    brier/rel/res/log_loss remain valid on that same draw."""
+    df = pl.DataFrame({"event_id": [f"e{i}" for i in range(20)], "market_id": [f"m{i}" for i in range(20)], "y": list(range(20))})
+
+    def stat_fn_both(d):
+        val = float("nan") if "m0" not in d["market_id"].to_list() else 1.0
+        return {"maybe_nan": val, "always_ok": d["y"].mean()}
+
+    def stat_fn_only_always_ok(d):
+        return {"always_ok": d["y"].mean()}
+
+    result_both = event_bootstrap(df, stat_fn_both, B=300, seed=11)
+    result_solo = event_bootstrap(df, stat_fn_only_always_ok, B=300, seed=11)
+
+    assert result_both.n_valid["always_ok"] == 300  # unaffected by maybe_nan being nan on ~37% of draws
+    assert 0 < result_both.n_valid["maybe_nan"] < 300
+
+    # identical point/CI whether or not a sibling key was nan on the same draws -> proves independence
+    assert result_both.point["always_ok"] == result_solo.point["always_ok"]
+    assert result_both.ci_low["always_ok"] == result_solo.ci_low["always_ok"]
+    assert result_both.ci_high["always_ok"] == result_solo.ci_high["always_ok"]
