@@ -1,18 +1,47 @@
 # pm-calibration
 
-Are Polymarket prices well-calibrated probabilities? And where they're not, does the gap survive honest statistical treatment: inference that respects dependence between markets, timing that a trader could actually have observed in real time, and a real out-of-sample test, net of trading costs?
+Are Polymarket prices well-calibrated probabilities? And where they're not, does the gap survive honest statistical treatment: inference that respects dependence between markets, timing a trader could actually have observed in real time, and an out-of-sample test net of trading costs?
 
-This repo is the data pipeline and (soon) the analysis behind that question, built end to end from public Polymarket endpoints. No API key, no wallet, no scraped dataset. Everything here is reproducible from the two read-only Polymarket APIs plus public DNS resolvers.
+Everything here is built from the two public Polymarket read endpoints. No API key, no wallet, no purchased dataset.
 
 ## Why this exists
 
-Prediction market calibration got a lot of attention in 2025-2026: a handful of papers analyzed the same Polymarket/Kalshi data and reached opposite conclusions on whether the classic favorite-longshot bias is present. The disagreement traces to design choices these papers made differently: whether inference is done at the trade level or the market level, which time reference "how far from resolution" is measured against, and how they handle markets that resolve well before their scheduled end date (a majority of them, it turns out, once you check).
+Prediction market calibration got a lot of attention in 2025-2026, and several papers analyzing the same Polymarket and Kalshi data reached opposite conclusions on whether the classic favorite-longshot bias is there. The disagreement traces back to design choices each paper made differently: inference at the trade level or the market level, which clock "distance from resolution" is measured against, and how they treat markets that resolve long before their scheduled end date (most of them do, once you check).
 
-This project runs the same question with three things fixed: a market-level panel with event-clustered inference (a trade tape overstates precision when thousands of trades share one outcome), snapshot timing anchored to actual resolution rather than scheduled end date (verified necessary, not assumed), and an out-of-sample split at end of 2025, so H1 2026 tests whatever the published results claimed against data none of them had.
+So this project fixes three things and re-runs the question. Inference is market-level with bootstrap clustered by event, because thousands of trades sharing one realized outcome don't give you thousands of independent observations. Snapshot timing is anchored to actual resolution rather than scheduled end date, which turned out to matter far more than expected. And the whole of H1 2026 is locked away in code until the out-of-sample stage, so the final test runs against data no published paper has seen.
 
-## Current status
+## Results so far
 
-The ingestion and panel-construction pipeline (what the project plan calls W1) is complete and passing its own acceptance checks.
+Calibration measured on 52,310 market-snapshot observations from January 2024 through December 2025, spanning roughly 7,500 independent events.
+
+![Reliability diagram, pooled ex-Sports](reports/figures/ex_sports_reliability.png)
+
+The calibration slope β comes from a logistic fit of realized outcomes on logit-transformed prices. β = 1 means prices are calibrated. β > 1 means they're compressed toward 50%, which is the favorite-longshot signature: longshots priced too high, favorites too low.
+
+| Cell | n | β | 95% CI |
+|---|---|---|---|
+| **Pooled (ex-Sports)** | 33,517 | **1.165** | **[1.116, 1.224]** |
+| Econ/Finance | 4,729 | 1.353 | [1.242, 1.485] |
+| Geopolitics | 3,997 | 1.309 | [1.178, 1.463] |
+| Other | 1,708 | 1.172 | [0.982, 1.431] |
+| Politics | 13,750 | 1.146 | [1.063, 1.241] |
+| Culture | 5,237 | 1.098 | [0.981, 1.230] |
+| Crypto | 4,096 | 1.095 | [0.993, 1.220] |
+| Sports | 18,793 | 0.999 | [0.936, 1.068] |
+
+Three things stand out.
+
+**Compression is real in the pooled non-sports sample.** The confidence interval excludes 1.0 even under event-clustered inference, which is the conservative version. It holds up across most individual categories, strongest in Econ/Finance and Geopolitics.
+
+**Sports is the exception, and it's dead on.** β = 0.999 with a tight interval. Whatever drives the compression elsewhere, high-volume sports markets with a deep liquidity base and a fixed resolution date don't have it.
+
+**The literature's horizon pattern does not reproduce cleanly here.** Published work reports compression growing with time to resolution. In this panel, of the four categories with enough independent events to split three ways by horizon, only Geopolitics rises directionally (1.12 → 1.31 → 1.58) and even there the confidence intervals overlap. Crypto, Politics, and Sports aren't monotonic at all. That's a negative result and it's reported as one. Whether it reflects something real or an artifact of measuring horizon ex-ante rather than backwards from resolution is exactly what the next stage tests.
+
+Prices beat the base rate everywhere. Brier skill score runs 0.29 (Sports) to 0.60 (Politics), and the Murphy decomposition is lopsided: the reliability term is near zero (0.0009 to 0.0013) while resolution carries 0.068 to 0.073. Within any given price bucket the forecasts are close to honest. What limits them is discrimination, meaning prices don't move far enough from the base rate, not miscalibration inside the buckets.
+
+All of it is in-sample and descriptive. Whether it's signal or a design artifact is what the reconciliation grid tests next, and whether any of it is tradeable is a separate question again.
+
+## Pipeline
 
 | | |
 |---|---|
@@ -20,33 +49,40 @@ The ingestion and panel-construction pipeline (what the project plan calls W1) i
 | Distinct events | 203,087 |
 | Panel-eligible markets (scheduled life ≥ 168h) | 94,442 |
 | Price history coverage | 98.86% |
-| Panel rows built (monthly snapshots, Jan 2024 - Jun 2026) | 95,899 |
-| Of which usable now (pre out-of-sample lock) | 52,388 |
-| Tests passing | 125 |
+| Panel rows (monthly snapshots, Jan 2024 to Jun 2026) | 95,899 |
+| Usable now, before the out-of-sample unlock | 52,388 |
+| Tests | 177 |
 
-Every non-trivial design decision along the way, including the ones that reversed an earlier assumption, is logged in [DECISIONS.md](DECISIONS.md) with the date, the number that drove it, and what changed. A few examples: the pagination scheme had to switch from offset-based to cursor-based once markets past ~2,000 rows per window started returning errors, the population turned out to be 46% crypto micro-markets that a 168-hour minimum lifetime filter naturally excludes from the panel, and 21-40% of markets in every category resolve more than two days before their scheduled end date, which is why snapshot openness is computed against actual resolution time and not the scheduled one.
+Getting there was less tidy than that table suggests. [DECISIONS.md](DECISIONS.md) logs every deviation from the original plan with the date, the number that forced it, and what changed. Some highlights: offset pagination silently caps out around 2,000 rows per window and had to be replaced with cursor-based paging (the API also returns page 1 again, with a 200, if you guess the cursor parameter name wrong, so there's a guard for that). The population turned out to be 46% crypto micro-markets on 24-hour cycles, which a 168-hour minimum lifetime filter removes from the panel by construction. Between 21% and 40% of markets in every category resolve more than two days early, which is why openness at a snapshot is computed against actual resolution and never against the scheduled date.
+
+The most useful thing that came out of that process: row count is not a usable proxy for statistical power here. Sports has the most rows of any category by a wide margin and still nearly fails a 200-cluster floor when split by horizon, because a handful of long-lived markets generate many repeated snapshot rows each. Cluster counts are now reported in every stratified output rather than assumed.
 
 ## Primary specification
 
-Committed here before any calibration statistic gets computed on the full sample, which is the point: a pre-registered spec means results can't get quietly adjusted to look better after the fact.
+Committed before any calibration statistic was computed on the full sample, which is the whole point. A pre-registered spec means the results can't quietly drift toward whatever looks better afterward.
 
-- **Population:** binary Polymarket markets resolved between 2024-01-01 and 2026-06-30, volume ≥ $10,000, scheduled lifetime ≥ 168 hours.
-- **Panel design:** monthly snapshots (1st of month, UTC), one row per market per snapshot where the market was open (created before the snapshot, not yet resolved by it). Price taken from the last available point within 72 hours of the snapshot.
-- **Inference unit:** market, not trade. Standard errors via block bootstrap resampled by event, since markets in the same event share one realized outcome.
-- **Primary estimand:** calibration regression logit(P(Y=1)) = α + β·logit(p) by category, tested against α=0, β=1. β>1 means prices are compressed toward 0.5 (the favorite-longshot signature).
-- **Out-of-sample split:** fit through 2025-12-31, evaluate January-June 2026. That window is technically locked at the code level (`src/panel/io.py`, `load_panel()`) so nothing before W4 can read it, whether or not it's an accident.
-- **Costs:** exact per-market fee flags where Polymarket enabled them, spread from historical order books where available, capital cost from lockup duration against the risk-free rate.
+- **Population:** binary markets resolved between 2024-01-01 and 2026-06-30, volume ≥ $10,000, scheduled lifetime ≥ 168 hours.
+- **Panel:** monthly snapshots (1st of month, UTC), one row per open market per snapshot, price taken from the last point within 72 hours.
+- **Inference unit:** market, not trade. Block bootstrap resampled by event, B = 2,000.
+- **Primary estimand:** logit(P(Y=1)) = α + β·logit(p), tested against α = 0, β = 1. The pooled ex-Sports cell is the primary result; every other cell is labeled secondary in the output itself.
+- **Out-of-sample:** fit through 2025-12-31, evaluate January to June 2026. Enforced in code (`src/panel/io.py`), not by good intentions.
+- **Costs:** per-market fee flags, spread from historical order books, capital cost from lockup duration against the risk-free rate.
 
 ## Repo layout
 
 ```
-config/spec.yaml         snapshot dates, filters, OOS boundary, the pre-registered numbers
-src/ingest/               Gamma and CLOB API clients, DNS handling, caching, retry logic
-src/panel/                resolution parsing, category mapping, panel construction, the OOS loader
-spikes/                   one-off feasibility and sanity checks (Gate A/B/C reports)
-tests/                    125 tests, mostly edge cases the real data actually produced
-DECISIONS.md              dated log of every deviation from the original plan and why
+config/spec.yaml      snapshot dates, filters, OOS boundary, the pre-registered numbers
+src/ingest/           Gamma and CLOB clients, DNS handling, caching, retry and gap logging
+src/panel/            resolution parsing, category mapping, panel construction, the OOS loader
+src/inference/        event-clustered bootstrap, the single source of every CI in the project
+src/calibration/      reliability diagrams, Murphy decomposition, the calibration regression
+spikes/               feasibility and sanity reports (Gates A through D)
+reports/figures/      generated reliability diagrams
+tests/                177 tests, mostly edge cases the real data actually produced
+DECISIONS.md          dated log of every design decision and reversal
 ```
+
+Isotonic regression, the IRLS logistic fit, and the Benjamini-Hochberg correction are written out rather than imported, each benchmarked against an established implementation and pinned to hardcoded golden values in the tests. scipy handles the exact binomial test, where hand-rolling the CDF work isn't worth the precision risk.
 
 ## Running it
 
@@ -56,8 +92,12 @@ pip install -r requirements.txt
 pytest tests/ -q
 ```
 
-Rebuilding the panel from scratch means re-pulling ~331k markets and ~94k price histories from Polymarket's public API, which takes a few hours. Cached raw responses aren't committed (data/ is gitignored) but the ingestion scripts are resumable and will pick up where they left off.
+Rebuilding the panel from scratch re-pulls 331k markets and 94k price histories, roughly twelve hours against the public API. Raw responses aren't committed (`data/` is gitignored) but every ingestion script is resumable and skips whatever it already has.
 
 ## What's next
 
-Calibration proper: reliability diagrams, Brier score decomposition, the logit regression above, then a reconciliation step that reproduces the published disagreement on purpose by varying weighting scheme and time reference, before the out-of-sample test on H1 2026 net of costs.
+The reconciliation grid: re-estimate across weighting scheme, time reference, sample definition, and period, to show which design choices flip the published result and which don't. Then the out-of-sample test on H1 2026, net of fees, spread, and the cost of capital locked up until resolution.
+
+---
+
+Built by Angelo Marano, incoming MSc Statistics at ETH Zurich.
