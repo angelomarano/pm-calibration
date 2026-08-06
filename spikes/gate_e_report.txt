@@ -1,0 +1,73 @@
+====================== GATE E REPORT -- W3 CLOSES ======================
+
+[0] SUMMARY OF RECORD -- what W3 actually established (descriptive, in-sample only):
+  1. The clock axis does not move the estimate. A_full vs B_full: 21/21
+     cells overlap; A_term vs B_term: 21/21 overlap. Ex-ante and
+     ex-post horizons are statistically indistinguishable here, on both the full sample
+     and the ran-to-term restriction (W3a).
+  2. What DOES move the estimate is sample composition -- specifically, the ran-to-term
+     restriction, holding the clock fixed: A_full vs A_term overlap 19/21,
+     B_full vs B_term overlap 20/21. 1 cell(s) DIFFER
+     on BOTH clocks for the same (category, tercile) -- the cross-clock-validated instance(s):
+       Politics t2
+     (W3a).
+  3. Volume weighting mainly costs effective sample size, not beta. Kish's n_eff
+     collapses 9.7x to 132.7x across the W3b/W3c cells (every
+     equal-vs-weighted pair widens the beta CI, none narrows), directionally tracking
+     each category's volume concentration but not a clean rank match (W3b/W3c).
+
+[1] does any single axis flip beta across 1.0, holding the others fixed?
+    weighting: fixed={'sample': 'ex_Sports', 'period': '2025'} ('equal', 1.1434095648814946) vs ('volume_weighted', 0.9614389461141616)
+    weighting: fixed={'sample': 'ran_to_term', 'period': '2025'} ('equal', 1.0782522750789094) vs ('volume_weighted', 0.915284013526844)
+    weighting: fixed={'sample': 'all', 'period': '2025'} ('equal', 1.0880275949870555) vs ('volume_weighted', 0.973988038805772)
+    weighting: fixed={'category': 'Culture'} ('equal', 1.0975983196794945) vs ('volume_weighted', 0.8624944358966182)
+    weighting: fixed={'category': 'Sports'} ('equal', 0.9985038294911717) vs ('volume_weighted', 1.0340647060717802)
+    weighting: fixed={'category': 'Crypto'} ('equal', 1.0952603508224534) vs ('volume_weighted', 0.8624411858879274)
+    weighting: fixed={'category': 'Geopolitics'} ('equal', 1.3093989574939544) vs ('volume_weighted', 0.6292658691294832)
+    sample: fixed={'weighting': 'equal', 'period': '2025'} ('all', 1.0880275949870555) vs ('top_liquidity_tercile', 0.9960927736434767)
+    sample: fixed={'weighting': 'equal', 'period': '2025'} ('ex_Sports', 1.1434095648814946) vs ('top_liquidity_tercile', 0.9960927736434767)
+    sample: fixed={'weighting': 'equal', 'period': '2025'} ('ran_to_term', 1.0782522750789094) vs ('top_liquidity_tercile', 0.9960927736434767)
+    period: fixed={'weighting': 'volume_weighted', 'sample': 'ex_Sports'} ('2024', 1.204498157331614) vs ('2025', 0.9614389461141616)
+    period: fixed={'weighting': 'volume_weighted', 'sample': 'top_liquidity_tercile'} ('2024', 1.2259910451828173) vs ('2025', 0.9698031942910688)
+    period: fixed={'weighting': 'volume_weighted', 'sample': 'all'} ('2024', 1.2293082003775655) vs ('2025', 0.973988038805772)
+    period: fixed={'weighting': 'equal', 'sample': 'top_liquidity_tercile'} ('2024', 1.0624974131396476) vs ('2025', 0.9960927736434767)
+    period: fixed={'weighting': 'volume_weighted', 'sample': 'ran_to_term'} ('2024', 2.068079848019862) vs ('2025', 0.915284013526844)
+    -> 7 flip(s) on weighting -- expected, per [0].3's precision finding
+       (widened CIs straddle 1.0 even when the point barely moves).
+       Of the sample/period flips, 3/3 sample and
+       1/5 period flips hold at EQUAL weighting (narrow,
+       reliable CIs) -- those are not explainable by the weighting collapse and are the ones
+       worth a second look: [{'weighting': 'equal', 'period': '2025'}, {'weighting': 'equal', 'period': '2025'}, {'weighting': 'equal', 'period': '2025'}, {'weighting': 'equal', 'sample': 'top_liquidity_tercile'}]
+
+[2] widest / narrowest cells, and does width track n_clusters/n_eff as expected?
+    widest:    ran_to_term/2024/volume_weighted width=3.640  n_clusters=1083  n_eff=46.2
+    narrowest: all/2025/equal                 width=0.096  n_clusters=6240  n_eff=40820.0
+    corr(n_eff, beta_ci_width) across 30 cells: -0.437 (PASS -- more effective information, narrower CI, as expected)
+
+[3] LOW_POWER cells: 0 across 30 total (W3b=0/16, W3c=0/14).
+    None of [0]'s summary-of-record statements above rest on a LOW_POWER cell -- confirmed
+    by construction, since [0] cites overlap counts and n_eff ratios aggregated across
+    cells, not any single thin cell's point estimate.
+
+[4] clock comparison, restated: does the published (ex-post) pattern reappear here, and
+  what does the ran-to-term restriction say about the mechanism?
+  No: switching from the ex-ante clock (A, days_to_sched_end) to the ex-post literature
+  clock (B, days_to_resolution) does not surface a different pattern on this panel --
+  21/21 category-tercile cells overlap on the full sample and
+  21/21 on the ran-to-term subset, so there is no A/B divergence
+  for the literature's clock to resolve here. What the ran-to-term restriction (dropping
+  46.0% of rows overall, 22%-60% depending on category) shows instead is
+  that early resolvers are a real, category-varying selection effect on sample composition --
+  confirmed at 1 cell(s) that move on BOTH clocks under the restriction --
+  but it is a sample-composition finding, not evidence that the clock itself was misspecified.
+
+[5] W2d reconciliation (hard assertion, not printed PASS/ATTENTION): standalone pooled ex-Sports / equal weight / full period call reproduces beta=1.1653046515 exactly against W2d's headline 1.1653046515. PASS (script would have halted before this line otherwise).
+
+  dropped-row accounting (for reference): {'loaded': 52388, 'dropped_null_y': 78, 'dropped_ambiguous': 78, 'dropped_total': 78, 'kept': 52310}
+
+====================================================================
+EXIT VERDICT
+  all checks: PASS -- W3 closes, W4 opens
+  (4 sample/period sign flip(s) under EQUAL weighting noted in [1] above --
+   not blocking, but worth keeping in mind for Gate E's own read of the grid.)
+====================================================================
