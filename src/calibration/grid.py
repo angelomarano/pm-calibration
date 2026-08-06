@@ -34,6 +34,15 @@ WLS is invariant to a uniform rescaling of weights, see
 fit_calibration_regression's docstring, so this only affects how the
 weight column reads, never beta).
 
+n_eff (Kish's effective sample size, computed on the cell's weight array
+before bootstrapping) and beta_ci_width are reported per cell: the real
+grid result is that volume weighting mainly destroys precision rather
+than moving the point estimate (every equal-vs-weighted pair widens, one
+by ~14x) -- n_eff converts "the CI got wider" into a number directly
+comparable to the row's own n, i.e. how much of the nominal sample the
+weighted likelihood is actually using once a few high-volume markets
+dominate it.
+
 Gate E's reconciliation check against W2d's headline (pooled ex-Sports,
 equal weight, full period -> beta=1.165 exactly) is NOT a cell in this
 grid -- there is no "full period" level here, and adding a third period
@@ -44,6 +53,7 @@ logic on the ex-Sports population, not by reading a grid row.
 
 from __future__ import annotations
 
+import numpy as np
 import polars as pl
 
 from src.calibration.clocks import add_days_early, ran_to_term_frame
@@ -85,6 +95,14 @@ def add_volume_weight(df: pl.DataFrame, volume_col: str = "volume_num") -> pl.Da
     return df.with_columns((pl.col(volume_col) / mean_vol).alias("weight"))
 
 
+def kish_effective_sample_size(weights: np.ndarray) -> float:
+    """Kish's effective sample size: n_eff = (sum w)^2 / sum(w^2). For
+    uniform weights this reduces exactly to n (equal weighting is a
+    no-op here too), so it's reported for every cell, not just the
+    volume-weighted ones -- directly comparable to the row's own n."""
+    return float(np.sum(weights) ** 2 / np.sum(weights**2))
+
+
 def weighted_calibration_stat_fn(df: pl.DataFrame) -> dict[str, float]:
     """Like calibration_stat_fn, but reads a pre-existing `weight` column
     (see add_volume_weight) and fits with case weights. Precondition:
@@ -118,10 +136,13 @@ def build_reconciliation_grid(
                 if weighting == "equal":
                     stat_fn = calibration_stat_fn
                     fit_input = cell
+                    weight_arr = np.ones(cell.height)
                 else:
                     fit_input = add_volume_weight(cell)
                     stat_fn = weighted_calibration_stat_fn
+                    weight_arr = fit_input["weight"].to_numpy()
                 result = event_bootstrap(fit_input, stat_fn, B=B, seed=seed)
+                beta_ci_low, beta_ci_high = result.ci_low["beta"], result.ci_high["beta"]
                 rows.append(
                     {
                         "weighting": weighting,
@@ -129,13 +150,15 @@ def build_reconciliation_grid(
                         "period": period,
                         "n": cell.height,
                         "n_clusters": n_clusters_val,
+                        "n_eff": kish_effective_sample_size(weight_arr),
                         "low_power": n_clusters_val < cluster_floor,
                         "alpha_point": result.point["alpha"],
                         "alpha_ci_low": result.ci_low["alpha"],
                         "alpha_ci_high": result.ci_high["alpha"],
                         "beta_point": result.point["beta"],
-                        "beta_ci_low": result.ci_low["beta"],
-                        "beta_ci_high": result.ci_high["beta"],
+                        "beta_ci_low": beta_ci_low,
+                        "beta_ci_high": beta_ci_high,
+                        "beta_ci_width": beta_ci_high - beta_ci_low,
                     }
                 )
     return pl.DataFrame(rows)

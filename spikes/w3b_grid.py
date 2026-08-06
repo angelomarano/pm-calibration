@@ -111,9 +111,31 @@ def main():
     for r in table.sort(["sample", "period", "weighting"]).iter_rows(named=True):
         flag = " LOW_POWER" if r["low_power"] else ""
         L.append(
-            f"  {r['sample']:<22} {r['period']:<5} {r['weighting']:<16} n={r['n']:<7} n_clusters={r['n_clusters']:<6}"
-            f" beta={r['beta_point']:.3f} CI=[{r['beta_ci_low']:.3f}, {r['beta_ci_high']:.3f}]{flag}"
+            f"  {r['sample']:<22} {r['period']:<5} {r['weighting']:<16} n={r['n']:<7} n_eff={r['n_eff']:<9.1f}"
+            f" n_clusters={r['n_clusters']:<6} beta={r['beta_point']:.3f}"
+            f" CI=[{r['beta_ci_low']:.3f}, {r['beta_ci_high']:.3f}] width={r['beta_ci_width']:.3f}{flag}"
         )
+
+    L.append(
+        "\n[2] equal-vs-weighted CI-width ratio, per (sample, period) -- descriptive, no editorializing:"
+    )
+    for sample in SAMPLE_LEVELS:
+        for period in PERIOD_LEVELS:
+            eq = table.filter(
+                (pl.col("sample") == sample) & (pl.col("period") == period) & (pl.col("weighting") == "equal")
+            )
+            wt = table.filter(
+                (pl.col("sample") == sample) & (pl.col("period") == period) & (pl.col("weighting") == "volume_weighted")
+            )
+            if eq.height == 0 or wt.height == 0:
+                continue
+            eq_w, wt_w = eq["beta_ci_width"][0], wt["beta_ci_width"][0]
+            eq_neff, wt_neff = eq["n_eff"][0], wt["n_eff"][0]
+            ratio = wt_w / eq_w if eq_w else float("nan")
+            L.append(
+                f"  {sample:<22} {period:<5} width: equal={eq_w:.3f} weighted={wt_w:.3f} ratio={ratio:.2f}x"
+                f"   n_eff: equal={eq_neff:.0f} weighted={wt_neff:.1f}"
+            )
 
     L.append(f"\n  dropped-row accounting (W2's exclusion, for reference): {drop_stats}")
     L.append(f"\n  figure written to {FIGURE_PATH}")

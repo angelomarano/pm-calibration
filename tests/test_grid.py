@@ -14,6 +14,7 @@ from src.calibration.grid import (
     apply_period_filter,
     apply_sample_filter,
     build_reconciliation_grid,
+    kish_effective_sample_size,
     period_overlap_stats,
     weighted_calibration_stat_fn,
 )
@@ -161,6 +162,35 @@ def test_build_reconciliation_grid_has_all_16_cells():
     assert seen == expected
     assert table["n_clusters"].min() > 0
     assert set(table["low_power"].to_list()) <= {True, False}
+
+
+def test_build_reconciliation_grid_reports_n_eff_and_ci_width():
+    df = _synthetic_panel(n=3000, seed=3)
+    table = build_reconciliation_grid(df, B=30, seed=0)
+    expected_width = (table["beta_ci_high"] - table["beta_ci_low"]).to_list()
+    assert table["beta_ci_width"].to_list() == pytest.approx(expected_width)
+    equal_rows = table.filter(pl.col("weighting") == "equal")
+    assert (equal_rows["n_eff"] == equal_rows["n"]).all()  # equal weighting: n_eff == n exactly
+    weighted_rows = table.filter(pl.col("weighting") == "volume_weighted")
+    assert (weighted_rows["n_eff"] <= weighted_rows["n"]).all()  # Kish's n_eff never exceeds n
+
+
+def test_kish_effective_sample_size_uniform_weights_equals_n():
+    w = np.ones(50)
+    assert kish_effective_sample_size(w) == pytest.approx(50.0)
+
+
+def test_kish_effective_sample_size_scale_invariant():
+    w = np.array([1.0, 2.0, 3.0, 10.0])
+    assert kish_effective_sample_size(w) == pytest.approx(kish_effective_sample_size(3.0 * w))
+
+
+def test_kish_effective_sample_size_skewed_weights_below_n():
+    """One dominant weight among many tiny ones -- n_eff should collapse
+    toward ~1, not stay near the nominal count."""
+    w = np.concatenate([[100.0], np.full(99, 0.01)])
+    n_eff = kish_effective_sample_size(w)
+    assert n_eff < 5.0
 
 
 def test_period_overlap_stats_detects_shared_cluster():

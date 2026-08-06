@@ -16,22 +16,32 @@ period cells. Cluster overlap per sample level (coalesce(event_id, market_id)):
   a large shared-cluster share means the two period cells are not resampling disjoint units.
 
 [1] full grid (weighting x sample x period), 16 cells:
-  all                    2024  equal            n=11490   n_clusters=1592   beta=1.177 CI=[1.096, 1.265]
-  all                    2024  volume_weighted  n=11490   n_clusters=1592   beta=1.229 CI=[0.701, 1.829]
-  all                    2025  equal            n=40820   n_clusters=6240   beta=1.088 CI=[1.040, 1.136]
-  all                    2025  volume_weighted  n=40820   n_clusters=6240   beta=0.974 CI=[0.836, 1.151]
-  ex_Sports              2024  equal            n=8988    n_clusters=1402   beta=1.218 CI=[1.123, 1.327]
-  ex_Sports              2024  volume_weighted  n=8988    n_clusters=1402   beta=1.204 CI=[0.596, 2.133]
-  ex_Sports              2025  equal            n=24529   n_clusters=3710   beta=1.143 CI=[1.083, 1.210]
-  ex_Sports              2025  volume_weighted  n=24529   n_clusters=3710   beta=0.961 CI=[0.812, 1.152]
-  ran_to_term            2024  equal            n=6135    n_clusters=1083   beta=1.332 CI=[1.218, 1.472]
-  ran_to_term            2024  volume_weighted  n=6135    n_clusters=1083   beta=2.068 CI=[0.773, 4.413]
-  ran_to_term            2025  equal            n=22113   n_clusters=4612   beta=1.078 CI=[1.014, 1.147]
-  ran_to_term            2025  volume_weighted  n=22113   n_clusters=4612   beta=0.915 CI=[0.725, 1.214]
-  top_liquidity_tercile  2024  equal            n=3829    n_clusters=360    beta=1.062 CI=[0.932, 1.221]
-  top_liquidity_tercile  2024  volume_weighted  n=3829    n_clusters=360    beta=1.226 CI=[0.692, 1.891]
-  top_liquidity_tercile  2025  equal            n=13611   n_clusters=2109   beta=0.996 CI=[0.923, 1.080]
-  top_liquidity_tercile  2025  volume_weighted  n=13611   n_clusters=2109   beta=0.970 CI=[0.825, 1.146]
+  all                    2024  equal            n=11490   n_eff=11490.0   n_clusters=1592   beta=1.177 CI=[1.096, 1.265] width=0.169
+  all                    2024  volume_weighted  n=11490   n_eff=184.4     n_clusters=1592   beta=1.229 CI=[0.701, 1.829] width=1.128
+  all                    2025  equal            n=40820   n_eff=40820.0   n_clusters=6240   beta=1.088 CI=[1.040, 1.136] width=0.096
+  all                    2025  volume_weighted  n=40820   n_eff=1497.2    n_clusters=6240   beta=0.974 CI=[0.836, 1.151] width=0.315
+  ex_Sports              2024  equal            n=8988    n_eff=8988.0    n_clusters=1402   beta=1.218 CI=[1.123, 1.327] width=0.204
+  ex_Sports              2024  volume_weighted  n=8988    n_eff=109.0     n_clusters=1402   beta=1.204 CI=[0.596, 2.133] width=1.538
+  ex_Sports              2025  equal            n=24529   n_eff=24529.0   n_clusters=3710   beta=1.143 CI=[1.083, 1.210] width=0.127
+  ex_Sports              2025  volume_weighted  n=24529   n_eff=847.1     n_clusters=3710   beta=0.961 CI=[0.812, 1.152] width=0.341
+  ran_to_term            2024  equal            n=6135    n_eff=6135.0    n_clusters=1083   beta=1.332 CI=[1.218, 1.472] width=0.254
+  ran_to_term            2024  volume_weighted  n=6135    n_eff=46.2      n_clusters=1083   beta=2.068 CI=[0.773, 4.413] width=3.640
+  ran_to_term            2025  equal            n=22113   n_eff=22113.0   n_clusters=4612   beta=1.078 CI=[1.014, 1.147] width=0.133
+  ran_to_term            2025  volume_weighted  n=22113   n_eff=644.7     n_clusters=4612   beta=0.915 CI=[0.725, 1.214] width=0.489
+  top_liquidity_tercile  2024  equal            n=3829    n_eff=3829.0    n_clusters=360    beta=1.062 CI=[0.932, 1.221] width=0.289
+  top_liquidity_tercile  2024  volume_weighted  n=3829    n_eff=177.1     n_clusters=360    beta=1.226 CI=[0.692, 1.891] width=1.199
+  top_liquidity_tercile  2025  equal            n=13611   n_eff=13611.0   n_clusters=2109   beta=0.996 CI=[0.923, 1.080] width=0.157
+  top_liquidity_tercile  2025  volume_weighted  n=13611   n_eff=1407.2    n_clusters=2109   beta=0.970 CI=[0.825, 1.146] width=0.321
+
+[2] equal-vs-weighted CI-width ratio, per (sample, period) -- descriptive, no editorializing:
+  all                    2024  width: equal=0.169 weighted=1.128 ratio=6.68x   n_eff: equal=11490 weighted=184.4
+  all                    2025  width: equal=0.096 weighted=0.315 ratio=3.29x   n_eff: equal=40820 weighted=1497.2
+  ex_Sports              2024  width: equal=0.204 weighted=1.538 ratio=7.55x   n_eff: equal=8988 weighted=109.0
+  ex_Sports              2025  width: equal=0.127 weighted=0.341 ratio=2.69x   n_eff: equal=24529 weighted=847.1
+  top_liquidity_tercile  2024  width: equal=0.289 weighted=1.199 ratio=4.15x   n_eff: equal=3829 weighted=177.1
+  top_liquidity_tercile  2025  width: equal=0.157 weighted=0.321 ratio=2.05x   n_eff: equal=13611 weighted=1407.2
+  ran_to_term            2024  width: equal=0.254 weighted=3.640 ratio=14.32x   n_eff: equal=6135 weighted=46.2
+  ran_to_term            2025  width: equal=0.133 weighted=0.489 ratio=3.69x   n_eff: equal=22113 weighted=644.7
 
   dropped-row accounting (W2's exclusion, for reference): {'loaded': 52388, 'dropped_null_y': 78, 'dropped_ambiguous': 78, 'dropped_total': 78, 'kept': 52310}
 
