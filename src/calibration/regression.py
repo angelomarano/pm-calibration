@@ -187,17 +187,27 @@ def per_bin_binomial_tests(df: pl.DataFrame, edges: list[float] = DECILE_EDGES, 
     return pl.DataFrame(rows)
 
 
-def horizon_tercile(df: pl.DataFrame) -> pl.DataFrame:
-    """Adds horizon_tercile (1/2/3) via qcut on days_to_sched_end (ex-ante
-    horizon; never days_to_resolution), computed WITHIN each category."""
+def tercile_within_category(df: pl.DataFrame, value_col: str, out_col: str = "tercile") -> pl.DataFrame:
+    """Adds out_col (1/2/3) via qcut(3) on value_col, computed
+    independently WITHIN each category (.over("category")). Generalizes
+    the mechanism originally built for horizon_tercile so W3's clocks.py
+    can reuse it on days_to_resolution too, not just days_to_sched_end."""
     return df.with_columns(
-        pl.col("days_to_sched_end")
+        pl.col(value_col)
         .qcut(3, labels=["1", "2", "3"], allow_duplicates=True)
         .over("category")
         .cast(pl.Utf8)
         .cast(pl.Int8)
-        .alias("horizon_tercile")
+        .alias(out_col)
     )
+
+
+def horizon_tercile(df: pl.DataFrame) -> pl.DataFrame:
+    """Adds horizon_tercile (1/2/3) via qcut on days_to_sched_end (ex-ante
+    horizon; never days_to_resolution), computed WITHIN each category.
+    Thin wrapper around tercile_within_category -- unchanged behavior,
+    see test_regression.py's byte-identical regression check."""
+    return tercile_within_category(df, "days_to_sched_end", out_col="horizon_tercile")
 
 
 def build_regression_report(df: pl.DataFrame, B: int = 2000, seed: int = 0) -> pl.DataFrame:

@@ -1,0 +1,187 @@
+===================== W3a CLOCK COMPARISON =====================
+
+Descriptive only. Clock B/B_full/B_term are reproduced to show what the
+literature's ex-post clock does on this panel -- NOT endorsed as a valid
+design here. Any pattern below is a checkpoint for the stopping-time
+hypothesis, not this project's estimate.
+
+[1] ran-to-term restriction: share of rows dropped (used by A_term/B_term):
+  Crypto         kept=3087  /4096   (dropped 24.6%)
+  Culture        kept=2820  /5237   (dropped 46.2%)
+  Econ/Finance   kept=3682  /4729   (dropped 22.1%)
+  Geopolitics    kept=3032  /3997   (dropped 24.1%)
+  Other          kept=1027  /1708   (dropped 39.9%)
+  Politics       kept=7136  /13750  (dropped 48.1%)
+  Sports         kept=7464  /18793  (dropped 60.3%)
+  ALL            kept=28248 /52310  (dropped 46.0%)
+
+[2] full table (category x clock x tercile):
+  Crypto         A_full  t1  n=1374   n_clusters=437    beta=1.075 CI=[0.952, 1.268]
+  Crypto         A_full  t2  n=1384   n_clusters=353    beta=1.005 CI=[0.876, 1.184]
+  Crypto         A_full  t3  n=1338   n_clusters=264    beta=1.190 CI=[1.009, 1.417]
+  Crypto         A_term  t1  n=1042   n_clusters=360    beta=1.436 CI=[1.211, 1.891]
+  Crypto         A_term  t2  n=1018   n_clusters=344    beta=1.213 CI=[1.020, 1.472]
+  Crypto         A_term  t3  n=1027   n_clusters=186    beta=1.381 CI=[0.885, 2.197] LOW_POWER
+  Crypto         B_full  t1  n=1369   n_clusters=455    beta=1.215 CI=[1.080, 1.440]
+  Crypto         B_full  t2  n=1363   n_clusters=436    beta=1.058 CI=[0.928, 1.226]
+  Crypto         B_full  t3  n=1364   n_clusters=241    beta=1.080 CI=[0.868, 1.330]
+  Crypto         B_term  t1  n=1031   n_clusters=359    beta=1.431 CI=[1.199, 1.960]
+  Crypto         B_term  t2  n=1027   n_clusters=348    beta=1.191 CI=[1.012, 1.455]
+  Crypto         B_term  t3  n=1029   n_clusters=177    beta=1.385 CI=[0.930, 2.184] LOW_POWER
+  Culture        A_full  t1  n=1823   n_clusters=507    beta=1.064 CI=[0.953, 1.205]
+  Culture        A_full  t2  n=1754   n_clusters=290    beta=1.208 CI=[1.077, 1.392]
+  Culture        A_full  t3  n=1660   n_clusters=192    beta=1.011 CI=[0.773, 1.341] LOW_POWER
+  Culture        A_term  t1  n=942    n_clusters=320    beta=1.003 CI=[0.865, 1.186]
+  Culture        A_term  t2  n=1034   n_clusters=272    beta=1.243 CI=[1.074, 1.502]
+  Culture        A_term  t3  n=844    n_clusters=140    beta=0.735 CI=[0.485, 1.092] LOW_POWER
+  Culture        B_full  t1  n=1746   n_clusters=477    beta=1.069 CI=[0.948, 1.211]
+  Culture        B_full  t2  n=1745   n_clusters=393    beta=1.236 CI=[1.121, 1.393]
+  Culture        B_full  t3  n=1746   n_clusters=205    beta=1.013 CI=[0.796, 1.317]
+  Culture        B_term  t1  n=940    n_clusters=320    beta=1.000 CI=[0.852, 1.181]
+  Culture        B_term  t2  n=940    n_clusters=272    beta=1.238 CI=[1.069, 1.488]
+  Culture        B_term  t3  n=940    n_clusters=140    beta=0.837 CI=[0.573, 1.178] LOW_POWER
+  Econ/Finance   A_full  t1  n=1663   n_clusters=501    beta=1.253 CI=[1.138, 1.399]
+  Econ/Finance   A_full  t2  n=1520   n_clusters=276    beta=1.391 CI=[1.213, 1.624]
+  Econ/Finance   A_full  t3  n=1546   n_clusters=139    beta=1.413 CI=[1.160, 1.775] LOW_POWER
+  Econ/Finance   A_term  t1  n=1312   n_clusters=441    beta=1.261 CI=[1.141, 1.421]
+  Econ/Finance   A_term  t2  n=1145   n_clusters=217    beta=1.445 CI=[1.223, 1.760]
+  Econ/Finance   A_term  t3  n=1225   n_clusters=111    beta=1.425 CI=[1.104, 2.002] LOW_POWER
+  Econ/Finance   B_full  t1  n=1579   n_clusters=533    beta=1.197 CI=[1.086, 1.338]
+  Econ/Finance   B_full  t2  n=1575   n_clusters=294    beta=1.449 CI=[1.278, 1.665]
+  Econ/Finance   B_full  t3  n=1575   n_clusters=149    beta=1.359 CI=[1.091, 1.759] LOW_POWER
+  Econ/Finance   B_term  t1  n=1228   n_clusters=426    beta=1.223 CI=[1.107, 1.378]
+  Econ/Finance   B_term  t2  n=1227   n_clusters=225    beta=1.420 CI=[1.200, 1.727]
+  Econ/Finance   B_term  t3  n=1227   n_clusters=113    beta=1.437 CI=[1.120, 1.962] LOW_POWER
+  Geopolitics    A_full  t1  n=1576   n_clusters=798    beta=1.120 CI=[0.985, 1.306]
+  Geopolitics    A_full  t2  n=1168   n_clusters=443    beta=1.311 CI=[1.122, 1.601]
+  Geopolitics    A_full  t3  n=1253   n_clusters=260    beta=1.584 CI=[1.268, 2.004]
+  Geopolitics    A_term  t1  n=1022   n_clusters=616    beta=1.167 CI=[0.977, 1.597]
+  Geopolitics    A_term  t2  n=1028   n_clusters=473    beta=1.544 CI=[1.183, 2.184]
+  Geopolitics    A_term  t3  n=982    n_clusters=214    beta=1.965 CI=[1.428, 3.468]
+  Geopolitics    B_full  t1  n=1333   n_clusters=769    beta=1.162 CI=[1.031, 1.338]
+  Geopolitics    B_full  t2  n=1332   n_clusters=571    beta=1.186 CI=[1.012, 1.420]
+  Geopolitics    B_full  t3  n=1332   n_clusters=277    beta=1.831 CI=[1.470, 2.385]
+  Geopolitics    B_term  t1  n=1011   n_clusters=621    beta=1.134 CI=[0.950, 1.477]
+  Geopolitics    B_term  t2  n=1011   n_clusters=477    beta=1.574 CI=[1.190, 2.355]
+  Geopolitics    B_term  t3  n=1010   n_clusters=223    beta=2.024 CI=[1.480, 3.827]
+  Other          A_full  t1  n=579    n_clusters=208    beta=1.168 CI=[0.970, 1.477]
+  Other          A_full  t2  n=560    n_clusters=141    beta=1.322 CI=[0.981, 1.910] LOW_POWER
+  Other          A_full  t3  n=569    n_clusters=85     beta=1.052 CI=[0.725, 1.581] LOW_POWER
+  Other          A_term  t1  n=395    n_clusters=163    beta=1.176 CI=[0.925, 1.561] LOW_POWER
+  Other          A_term  t2  n=324    n_clusters=82     beta=1.873 CI=[1.410, 3.182] LOW_POWER
+  Other          A_term  t3  n=308    n_clusters=43     beta=0.629 CI=[0.222, 1.372] LOW_POWER
+  Other          B_full  t1  n=570    n_clusters=253    beta=1.256 CI=[1.062, 1.532]
+  Other          B_full  t2  n=569    n_clusters=158    beta=1.385 CI=[1.078, 1.930] LOW_POWER
+  Other          B_full  t3  n=569    n_clusters=71     beta=0.906 CI=[0.574, 1.404] LOW_POWER
+  Other          B_term  t1  n=343    n_clusters=149    beta=1.277 CI=[1.028, 1.650] LOW_POWER
+  Other          B_term  t2  n=342    n_clusters=96     beta=1.484 CI=[1.035, 2.577] LOW_POWER
+  Other          B_term  t3  n=342    n_clusters=44     beta=0.723 CI=[0.314, 1.399] LOW_POWER
+  Politics       A_full  t1  n=5007   n_clusters=1301   beta=1.192 CI=[1.100, 1.297]
+  Politics       A_full  t2  n=4166   n_clusters=759    beta=1.061 CI=[0.962, 1.183]
+  Politics       A_full  t3  n=4577   n_clusters=501    beta=1.185 CI=[1.065, 1.340]
+  Politics       A_term  t1  n=2406   n_clusters=922    beta=1.332 CI=[1.185, 1.549]
+  Politics       A_term  t2  n=2357   n_clusters=511    beta=1.465 CI=[1.276, 1.742]
+  Politics       A_term  t3  n=2373   n_clusters=345    beta=1.606 CI=[1.321, 2.018]
+  Politics       B_full  t1  n=4584   n_clusters=1487   beta=1.186 CI=[1.109, 1.279]
+  Politics       B_full  t2  n=4583   n_clusters=854    beta=1.090 CI=[1.000, 1.191]
+  Politics       B_full  t3  n=4583   n_clusters=497    beta=1.191 CI=[1.049, 1.368]
+  Politics       B_term  t1  n=2379   n_clusters=922    beta=1.329 CI=[1.179, 1.542]
+  Politics       B_term  t2  n=2378   n_clusters=513    beta=1.488 CI=[1.314, 1.750]
+  Politics       B_term  t3  n=2379   n_clusters=346    beta=1.587 CI=[1.284, 2.032]
+  Sports         A_full  t1  n=6265   n_clusters=2505   beta=0.989 CI=[0.917, 1.067]
+  Sports         A_full  t2  n=6268   n_clusters=292    beta=0.922 CI=[0.830, 1.030]
+  Sports         A_full  t3  n=6260   n_clusters=204    beta=0.919 CI=[0.790, 1.079]
+  Sports         A_term  t1  n=2506   n_clusters=1123   beta=0.906 CI=[0.805, 1.024]
+  Sports         A_term  t2  n=2480   n_clusters=875    beta=0.885 CI=[0.760, 1.024]
+  Sports         A_term  t3  n=2478   n_clusters=126    beta=0.505 CI=[0.273, 0.765] LOW_POWER
+  Sports         B_full  t1  n=6265   n_clusters=2463   beta=1.067 CI=[0.996, 1.139]
+  Sports         B_full  t2  n=6264   n_clusters=417    beta=0.988 CI=[0.895, 1.102]
+  Sports         B_full  t3  n=6264   n_clusters=221    beta=0.813 CI=[0.665, 0.960]
+  Sports         B_term  t1  n=2488   n_clusters=1145   beta=0.920 CI=[0.804, 1.043]
+  Sports         B_term  t2  n=2488   n_clusters=853    beta=0.877 CI=[0.763, 1.001]
+  Sports         B_term  t3  n=2488   n_clusters=127    beta=0.507 CI=[0.265, 0.772] LOW_POWER
+
+[3] rising-with-horizon classification, per category x clock:
+  Crypto         A_full  not monotonically rising
+  Crypto         A_term  not monotonically rising
+  Crypto         B_full  not monotonically rising
+  Crypto         B_term  not monotonically rising
+  Culture        A_full  not monotonically rising
+  Culture        A_term  not monotonically rising
+  Culture        B_full  not monotonically rising
+  Culture        B_term  not monotonically rising
+  Econ/Finance   A_full  directionally rising but overlapping
+  Econ/Finance   A_term  not monotonically rising
+  Econ/Finance   B_full  not monotonically rising
+  Econ/Finance   B_term  directionally rising but overlapping
+  Geopolitics    A_full  directionally rising but overlapping
+  Geopolitics    A_term  directionally rising but overlapping
+  Geopolitics    B_full  directionally rising but overlapping
+  Geopolitics    B_term  directionally rising but overlapping
+  Other          A_full  not monotonically rising
+  Other          A_term  not monotonically rising
+  Other          B_full  not monotonically rising
+  Other          B_term  not monotonically rising
+  Politics       A_full  not monotonically rising
+  Politics       A_term  directionally rising but overlapping
+  Politics       B_full  not monotonically rising
+  Politics       B_term  directionally rising but overlapping
+  Sports         A_full  not monotonically rising
+  Sports         A_term  not monotonically rising
+  Sports         B_full  not monotonically rising
+  Sports         B_term  not monotonically rising
+
+[4] prediction check: does A_term ~= B_term per (category, tercile)?
+  If the A_full/B_full gap is stopping-time selection, A_term and B_term should
+  nearly coincide here (the two clocks' underlying values are ~equal on the
+  ran-to-term subset by construction). Divergence means another explanation is needed.
+
+  21/21 (category, tercile) cells have overlapping CIs (A_term ~= B_term holds)
+    Crypto         t1  A_term_beta=1.436  B_term_beta=1.431  diff=+0.005  [MATCH]
+    Crypto         t2  A_term_beta=1.213  B_term_beta=1.191  diff=+0.022  [MATCH]
+    Crypto         t3  A_term_beta=1.381  B_term_beta=1.385  diff=-0.003  [MATCH]
+    Culture        t1  A_term_beta=1.003  B_term_beta=1.000  diff=+0.003  [MATCH]
+    Culture        t2  A_term_beta=1.243  B_term_beta=1.238  diff=+0.005  [MATCH]
+    Culture        t3  A_term_beta=0.735  B_term_beta=0.837  diff=-0.102  [MATCH]
+    Econ/Finance   t1  A_term_beta=1.261  B_term_beta=1.223  diff=+0.038  [MATCH]
+    Econ/Finance   t2  A_term_beta=1.445  B_term_beta=1.420  diff=+0.025  [MATCH]
+    Econ/Finance   t3  A_term_beta=1.425  B_term_beta=1.437  diff=-0.012  [MATCH]
+    Geopolitics    t1  A_term_beta=1.167  B_term_beta=1.134  diff=+0.033  [MATCH]
+    Geopolitics    t2  A_term_beta=1.544  B_term_beta=1.574  diff=-0.030  [MATCH]
+    Geopolitics    t3  A_term_beta=1.965  B_term_beta=2.024  diff=-0.059  [MATCH]
+    Other          t1  A_term_beta=1.176  B_term_beta=1.277  diff=-0.101  [MATCH]
+    Other          t2  A_term_beta=1.873  B_term_beta=1.484  diff=+0.389  [MATCH]
+    Other          t3  A_term_beta=0.629  B_term_beta=0.723  diff=-0.094  [MATCH]
+    Politics       t1  A_term_beta=1.332  B_term_beta=1.329  diff=+0.003  [MATCH]
+    Politics       t2  A_term_beta=1.465  B_term_beta=1.488  diff=-0.023  [MATCH]
+    Politics       t3  A_term_beta=1.606  B_term_beta=1.587  diff=+0.020  [MATCH]
+    Sports         t1  A_term_beta=0.906  B_term_beta=0.920  diff=-0.014  [MATCH]
+    Sports         t2  A_term_beta=0.885  B_term_beta=0.877  diff=+0.008  [MATCH]
+    Sports         t3  A_term_beta=0.505  B_term_beta=0.507  diff=-0.003  [MATCH]
+
+[5] context: A_full vs B_full (the raw literature-clock gap this whole comparison explains):
+    Crypto         t1  A_full_beta=1.075  B_full_beta=1.215  diff=-0.140  [MATCH]
+    Crypto         t2  A_full_beta=1.005  B_full_beta=1.058  diff=-0.053  [MATCH]
+    Crypto         t3  A_full_beta=1.190  B_full_beta=1.080  diff=+0.110  [MATCH]
+    Culture        t1  A_full_beta=1.064  B_full_beta=1.069  diff=-0.005  [MATCH]
+    Culture        t2  A_full_beta=1.208  B_full_beta=1.236  diff=-0.028  [MATCH]
+    Culture        t3  A_full_beta=1.011  B_full_beta=1.013  diff=-0.002  [MATCH]
+    Econ/Finance   t1  A_full_beta=1.253  B_full_beta=1.197  diff=+0.056  [MATCH]
+    Econ/Finance   t2  A_full_beta=1.391  B_full_beta=1.449  diff=-0.058  [MATCH]
+    Econ/Finance   t3  A_full_beta=1.413  B_full_beta=1.359  diff=+0.055  [MATCH]
+    Geopolitics    t1  A_full_beta=1.120  B_full_beta=1.162  diff=-0.042  [MATCH]
+    Geopolitics    t2  A_full_beta=1.311  B_full_beta=1.186  diff=+0.124  [MATCH]
+    Geopolitics    t3  A_full_beta=1.584  B_full_beta=1.831  diff=-0.247  [MATCH]
+    Other          t1  A_full_beta=1.168  B_full_beta=1.256  diff=-0.089  [MATCH]
+    Other          t2  A_full_beta=1.322  B_full_beta=1.385  diff=-0.063  [MATCH]
+    Other          t3  A_full_beta=1.052  B_full_beta=0.906  diff=+0.146  [MATCH]
+    Politics       t1  A_full_beta=1.192  B_full_beta=1.186  diff=+0.006  [MATCH]
+    Politics       t2  A_full_beta=1.061  B_full_beta=1.090  diff=-0.029  [MATCH]
+    Politics       t3  A_full_beta=1.185  B_full_beta=1.191  diff=-0.007  [MATCH]
+    Sports         t1  A_full_beta=0.989  B_full_beta=1.067  diff=-0.079  [MATCH]
+    Sports         t2  A_full_beta=0.922  B_full_beta=0.988  diff=-0.066  [MATCH]
+    Sports         t3  A_full_beta=0.919  B_full_beta=0.813  diff=+0.105  [MATCH]
+
+  dropped-row accounting (W2's exclusion, for reference): {'loaded': 52388, 'dropped_null_y': 78, 'dropped_ambiguous': 78, 'dropped_total': 78, 'kept': 52310}
+
+=================================================================
