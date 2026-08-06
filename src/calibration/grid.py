@@ -1,4 +1,6 @@
-"""W3b — the reconciliation grid: Weighting x Sample x Period, 16 cells.
+"""W3b/W3c — the reconciliation grid and the per-category weighting cut.
+
+W3b: Weighting x Sample x Period, 16 cells.
 
 No Clock axis. The original spec had one (ex-ante A / ex-post B /
 ran-to-term C), but it turned out to be a no-op: fit_calibration_regression
@@ -49,6 +51,16 @@ grid -- there is no "full period" level here, and adding a third period
 level just to cover one check would triple that axis's cost. Gate E does
 that check as a standalone call to build_regression_report-equivalent
 logic on the ex-Sports population, not by reading a grid row.
+
+W3c: the weighting axis alone, per category, full in-sample panel, no
+period/sample split -- 7 categories x 2 weightings = 14 cells
+(build_weighting_by_category_grid). Same no-Clock reasoning as W3b.
+Adds top1pct_volume_share per category: the prediction from W3b's pooled
+result is that the n_eff collapse under volume weighting tracks how
+concentrated that category's volume is (a handful of large markets
+dominating the weighted likelihood) -- reporting the concentration
+number alongside n_eff lets the report state whether that holds instead
+of leaving a reader to infer it from n_eff alone.
 """
 
 from __future__ import annotations
@@ -118,6 +130,48 @@ def weighted_calibration_stat_fn(df: pl.DataFrame) -> dict[str, float]:
     return {"alpha": fit["alpha"], "beta": fit["beta"]}
 
 
+def top1pct_volume_share(volume: np.ndarray) -> float:
+    """Share of total volume_num held by the top 1% of rows (at least
+    one row), the stated mechanism for W3c's n_eff collapse: the
+    prediction from W3b is that the collapse tracks volume concentration
+    -- categories with a few dominant markets should show the worst
+    effective-sample-size loss under volume weighting."""
+    n = len(volume)
+    total = float(volume.sum())
+    if n == 0 or total == 0:
+        return float("nan")
+    k = max(1, int(np.ceil(0.01 * n)))
+    top_sum = float(np.sort(volume)[-k:].sum())
+    return top_sum / total
+
+
+def _fit_cell(cell: pl.DataFrame, weighting: str, B: int, seed: int) -> dict:
+    """Runs event_bootstrap for one (weighting, rows) combination and
+    returns n_eff plus alpha/beta point, CI, and CI width. Shared by
+    build_reconciliation_grid and build_weighting_by_category_grid so
+    the equal/volume_weighted branching lives in exactly one place."""
+    if weighting == "equal":
+        stat_fn = calibration_stat_fn
+        fit_input = cell
+        weight_arr = np.ones(cell.height)
+    else:
+        fit_input = add_volume_weight(cell)
+        stat_fn = weighted_calibration_stat_fn
+        weight_arr = fit_input["weight"].to_numpy()
+    result = event_bootstrap(fit_input, stat_fn, B=B, seed=seed)
+    beta_ci_low, beta_ci_high = result.ci_low["beta"], result.ci_high["beta"]
+    return {
+        "n_eff": kish_effective_sample_size(weight_arr),
+        "alpha_point": result.point["alpha"],
+        "alpha_ci_low": result.ci_low["alpha"],
+        "alpha_ci_high": result.ci_high["alpha"],
+        "beta_point": result.point["beta"],
+        "beta_ci_low": beta_ci_low,
+        "beta_ci_high": beta_ci_high,
+        "beta_ci_width": beta_ci_high - beta_ci_low,
+    }
+
+
 def build_reconciliation_grid(
     df: pl.DataFrame, B: int = 2000, seed: int = 0, cluster_floor: int = CLUSTER_FLOOR
 ) -> pl.DataFrame:
@@ -133,16 +187,7 @@ def build_reconciliation_grid(
                 continue
             n_clusters_val = int(cell["event_id"].fill_null(cell["market_id"]).n_unique())
             for weighting in WEIGHTING_LEVELS:
-                if weighting == "equal":
-                    stat_fn = calibration_stat_fn
-                    fit_input = cell
-                    weight_arr = np.ones(cell.height)
-                else:
-                    fit_input = add_volume_weight(cell)
-                    stat_fn = weighted_calibration_stat_fn
-                    weight_arr = fit_input["weight"].to_numpy()
-                result = event_bootstrap(fit_input, stat_fn, B=B, seed=seed)
-                beta_ci_low, beta_ci_high = result.ci_low["beta"], result.ci_high["beta"]
+                fit_stats = _fit_cell(cell, weighting, B, seed)
                 rows.append(
                     {
                         "weighting": weighting,
@@ -150,17 +195,42 @@ def build_reconciliation_grid(
                         "period": period,
                         "n": cell.height,
                         "n_clusters": n_clusters_val,
-                        "n_eff": kish_effective_sample_size(weight_arr),
                         "low_power": n_clusters_val < cluster_floor,
-                        "alpha_point": result.point["alpha"],
-                        "alpha_ci_low": result.ci_low["alpha"],
-                        "alpha_ci_high": result.ci_high["alpha"],
-                        "beta_point": result.point["beta"],
-                        "beta_ci_low": beta_ci_low,
-                        "beta_ci_high": beta_ci_high,
-                        "beta_ci_width": beta_ci_high - beta_ci_low,
+                        **fit_stats,
                     }
                 )
+    return pl.DataFrame(rows)
+
+
+def build_weighting_by_category_grid(
+    df: pl.DataFrame, B: int = 2000, seed: int = 0, cluster_floor: int = CLUSTER_FLOOR
+) -> pl.DataFrame:
+    """W3c: one row per (category, weighting) -- 14 rows, full in-sample
+    panel, no period/sample split. top1pct_volume_share is reported per
+    category (same value on both weighting rows for that category) so
+    the n_eff collapse -- if it tracks concentration, per W3b's
+    prediction -- has a stated cause in the same table, not just an
+    observed number."""
+    rows: list[dict] = []
+    for cat in sorted(df["category"].unique().to_list()):
+        cell = df.filter(pl.col("category") == cat)
+        if cell.height == 0:
+            continue
+        n_clusters_val = int(cell["event_id"].fill_null(cell["market_id"]).n_unique())
+        concentration = top1pct_volume_share(cell["volume_num"].to_numpy())
+        for weighting in WEIGHTING_LEVELS:
+            fit_stats = _fit_cell(cell, weighting, B, seed)
+            rows.append(
+                {
+                    "category": cat,
+                    "weighting": weighting,
+                    "n": cell.height,
+                    "n_clusters": n_clusters_val,
+                    "top1pct_volume_share": concentration,
+                    "low_power": n_clusters_val < cluster_floor,
+                    **fit_stats,
+                }
+            )
     return pl.DataFrame(rows)
 
 

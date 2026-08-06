@@ -14,8 +14,10 @@ from src.calibration.grid import (
     apply_period_filter,
     apply_sample_filter,
     build_reconciliation_grid,
+    build_weighting_by_category_grid,
     kish_effective_sample_size,
     period_overlap_stats,
+    top1pct_volume_share,
     weighted_calibration_stat_fn,
 )
 
@@ -191,6 +193,59 @@ def test_kish_effective_sample_size_skewed_weights_below_n():
     w = np.concatenate([[100.0], np.full(99, 0.01)])
     n_eff = kish_effective_sample_size(w)
     assert n_eff < 5.0
+
+
+def test_top1pct_volume_share_concentrated_case():
+    """99 rows of volume=1, one row of volume=99 -> top 1% (1 row, since
+    ceil(0.01*100)=1) is the dominant row, holding half of total volume."""
+    volume = np.concatenate([[99.0], np.full(99, 1.0)])
+    share = top1pct_volume_share(volume)
+    assert share == pytest.approx(99.0 / 198.0)
+
+
+def test_top1pct_volume_share_uniform_case_near_one_percent():
+    """All rows equal volume -> top 1% share should be close to 1% (the
+    fraction of rows selected), not concentrated."""
+    volume = np.full(1000, 5.0)
+    share = top1pct_volume_share(volume)
+    assert share == pytest.approx(0.01, abs=0.002)
+
+
+def test_build_weighting_by_category_grid_has_14_rows_for_7_categories():
+    categories = ["Politics", "Sports", "Crypto", "Culture", "Geopolitics", "Other", "EconFinance"]
+    rng = np.random.default_rng(9)
+    rows = []
+    for i, cat in enumerate(categories):
+        for j in range(300):
+            true_rate = rng.uniform(0.2, 0.8)
+            y = rng.binomial(1, true_rate)
+            p = float(np.clip(true_rate + rng.normal(0, 0.15), 0.02, 0.98))
+            rows.append(
+                _row(
+                    market_id=f"{cat}_m{j}",
+                    event_id=f"{cat}_e{j}",
+                    category=cat,
+                    p=p,
+                    y=int(y),
+                    volume_num=float(rng.uniform(1, 1000)),
+                )
+            )
+    df = pl.DataFrame(rows)
+
+    table = build_weighting_by_category_grid(df, B=30, seed=0)
+    assert table.height == len(categories) * len(WEIGHTING_LEVELS)
+    seen = {(r["category"], r["weighting"]) for r in table.iter_rows(named=True)}
+    expected = {(c, w) for c in categories for w in WEIGHTING_LEVELS}
+    assert seen == expected
+
+    # top1pct_volume_share is a per-category property -- identical on both weighting rows
+    for cat in categories:
+        sub = table.filter(pl.col("category") == cat)
+        vals = sub["top1pct_volume_share"].to_list()
+        assert vals[0] == pytest.approx(vals[1])
+
+    equal_rows = table.filter(pl.col("weighting") == "equal")
+    assert (equal_rows["n_eff"] == equal_rows["n"]).all()
 
 
 def test_period_overlap_stats_detects_shared_cluster():

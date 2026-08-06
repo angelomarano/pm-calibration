@@ -154,3 +154,22 @@ cluster count, not row count, before trusting any stratified cell --
 applies to W3's reconciliation grid too (design x horizon x sample x
 period), which stratifies further still and will hit the same
 constraint, likely worse.
+
+2026-08-06 — W3b (reconciliation grid): volume weighting does not mainly
+shift the point estimate, it collapses effective sample size. Kish's
+n_eff = (sum w)^2 / sum(w^2) computed per cell shows the weighted fits
+using a fraction of the nominal rows: ran_to_term/2024 goes from n=6,135
+(equal weight) to n_eff=46.2 (~133x collapse), ex_Sports/2024 from 8,988
+to 109.0, and every one of the 8 equal-vs-weighted pairs widens the beta
+CI (ratios 2.05x to 14.32x, none narrower). Cause: Polymarket volume is
+heavily right-skewed, so a handful of large markets dominate the weighted
+likelihood.
+
+Relevance beyond this project: a trade-level analysis implicitly volume-
+weights (a market with 1,000 trades enters 1,000 times), so a nominal N
+in the hundreds of millions of trades can carry an effective sample size
+orders of magnitude smaller. This reverses the usual objection to
+market-level inference ("you discarded millions of observations"): on
+this data, the trade-weighted design has less effective information, not
+more. Quantified on the same panel, same estimator, same bootstrap — the
+only thing that changes is the weighting.

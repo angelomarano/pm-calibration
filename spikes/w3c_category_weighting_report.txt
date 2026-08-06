@@ -1,0 +1,40 @@
+==================== W3c PER-CATEGORY WEIGHTING CUT ====================
+
+No Clock axis, same reasoning as W3b. Full in-sample panel, no period/sample split --
+the direct analogue of the published trade-level vs market-level divergence, cut by
+category so the reader can see where volume weighting matters most.
+
+[1] full table (category x weighting), 14 cells:
+  Crypto         equal            n=4096    n_eff=4096.0    n_clusters=706    top1pct_vol_share=0.221 beta=1.095 CI=[0.993, 1.220] width=0.227
+  Crypto         volume_weighted  n=4096    n_eff=397.2     n_clusters=706    top1pct_vol_share=0.221 beta=0.862 CI=[0.630, 1.326] width=0.697
+  Culture        equal            n=5237    n_eff=5237.0    n_clusters=657    top1pct_vol_share=0.219 beta=1.098 CI=[0.981, 1.230] width=0.248
+  Culture        volume_weighted  n=5237    n_eff=486.3     n_clusters=657    top1pct_vol_share=0.219 beta=0.862 CI=[0.620, 1.257] width=0.637
+  Econ/Finance   equal            n=4729    n_eff=4729.0    n_clusters=654    top1pct_vol_share=0.363 beta=1.353 CI=[1.242, 1.485] width=0.243
+  Econ/Finance   volume_weighted  n=4729    n_eff=243.4     n_clusters=654    top1pct_vol_share=0.363 beta=1.502 CI=[1.158, 2.445] width=1.288
+  Geopolitics    equal            n=3997    n_eff=3997.0    n_clusters=981    top1pct_vol_share=0.429 beta=1.309 CI=[1.178, 1.463] width=0.285
+  Geopolitics    volume_weighted  n=3997    n_eff=173.8     n_clusters=981    top1pct_vol_share=0.429 beta=0.629 CI=[0.401, 1.155] width=0.753
+  Other          equal            n=1708    n_eff=1708.0    n_clusters=304    top1pct_vol_share=0.697 beta=1.172 CI=[0.982, 1.431] width=0.449
+  Other          volume_weighted  n=1708    n_eff=19.9      n_clusters=304    top1pct_vol_share=0.697 beta=1.899 CI=[1.195, 2.956] width=1.761
+  Politics       equal            n=13750   n_eff=13750.0   n_clusters=1568   top1pct_vol_share=0.571 beta=1.146 CI=[1.063, 1.241] width=0.178
+  Politics       volume_weighted  n=13750   n_eff=141.8     n_clusters=1568   top1pct_vol_share=0.571 beta=1.118 CI=[0.641, 1.737] width=1.096
+  Sports         equal            n=18793   n_eff=18793.0   n_clusters=2680   top1pct_vol_share=0.347 beta=0.999 CI=[0.936, 1.068] width=0.132
+  Sports         volume_weighted  n=18793   n_eff=926.7     n_clusters=2680   top1pct_vol_share=0.347 beta=1.034 CI=[0.800, 1.350] width=0.551
+
+[2] does the n_eff collapse track volume concentration? Per category, equal-vs-weighted
+  ratio and top1pct_volume_share side by side -- descriptive, no editorializing beyond
+  stating whether the pattern holds:
+  Crypto         top1pct_vol_share=0.221  n_eff collapse=  10.3x  CI-width ratio= 3.07x
+  Culture        top1pct_vol_share=0.219  n_eff collapse=  10.8x  CI-width ratio= 2.56x
+  Econ/Finance   top1pct_vol_share=0.363  n_eff collapse=  19.4x  CI-width ratio= 5.31x
+  Geopolitics    top1pct_vol_share=0.429  n_eff collapse=  23.0x  CI-width ratio= 2.64x
+  Other          top1pct_vol_share=0.697  n_eff collapse=  85.9x  CI-width ratio= 3.92x
+  Politics       top1pct_vol_share=0.571  n_eff collapse=  96.9x  CI-width ratio= 6.15x
+  Sports         top1pct_vol_share=0.347  n_eff collapse=  20.3x  CI-width ratio= 4.16x
+
+  Ranking by top1pct_volume_share: ['Other', 'Politics', 'Geopolitics', 'Econ/Finance', 'Sports', 'Crypto', 'Culture']
+  Ranking by n_eff collapse:        ['Politics', 'Other', 'Geopolitics', 'Sports', 'Econ/Finance', 'Culture', 'Crypto']
+  Rankings do NOT match exactly -- concentration alone does not fully explain the collapse pattern here.
+
+  dropped-row accounting (W2's exclusion, for reference): {'loaded': 52388, 'dropped_null_y': 78, 'dropped_ambiguous': 78, 'dropped_total': 78, 'kept': 52310}
+
+====================================================================
