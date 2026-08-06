@@ -206,6 +206,70 @@ def test_build_horizon_stratified_report_pools_thin_category(monkeypatch):
     assert healthy_rows["note"].null_count() == 3
 
 
+def test_fit_calibration_regression_weights_none_matches_omitted():
+    """weights=None (explicit) must be byte-identical to omitting the
+    argument entirely -- the default preserves current behavior exactly,
+    per W3b's spec requirement."""
+    rng = np.random.default_rng(3)
+    n = 2000
+    p = rng.uniform(0.02, 0.98, n)
+    y = rng.binomial(1, p).astype(float)
+    fit_omitted = fit_calibration_regression(p, y)
+    fit_explicit_none = fit_calibration_regression(p, y, weights=None)
+    assert fit_omitted == fit_explicit_none
+
+
+def test_fit_calibration_regression_uniform_weights_matches_unweighted():
+    """Uniform case weights (all 1.0) must give the same fit as no
+    weights at all -- a uniform weighting is a no-op."""
+    rng = np.random.default_rng(4)
+    n = 2000
+    p = rng.uniform(0.02, 0.98, n)
+    y = rng.binomial(1, p).astype(float)
+    fit_unweighted = fit_calibration_regression(p, y)
+    fit_uniform = fit_calibration_regression(p, y, weights=np.ones(n))
+    assert fit_uniform["alpha"] == pytest.approx(fit_unweighted["alpha"], abs=1e-8)
+    assert fit_uniform["beta"] == pytest.approx(fit_unweighted["beta"], abs=1e-8)
+
+
+def test_fit_calibration_regression_weight_scale_invariance():
+    """WLS normal equations are invariant to a uniform rescaling of the
+    weight vector ((X'WX)b = X'Wz scales both sides by the same constant)
+    -- scaling all weights by a constant must not move beta. Guards
+    against a normalization bug creeping into the IRLS loop itself."""
+    rng = np.random.default_rng(5)
+    n = 2000
+    p = rng.uniform(0.02, 0.98, n)
+    y = rng.binomial(1, p).astype(float)
+    w = rng.uniform(0.5, 3.0, n)
+    fit_w = fit_calibration_regression(p, y, weights=w)
+    fit_5w = fit_calibration_regression(p, y, weights=5.0 * w)
+    assert fit_5w["alpha"] == pytest.approx(fit_w["alpha"], abs=1e-8)
+    assert fit_5w["beta"] == pytest.approx(fit_w["beta"], abs=1e-8)
+
+
+def test_fit_calibration_regression_nonuniform_weights_change_fit():
+    """Sanity that weighting actually does something: concentrating
+    weight on a subset whose true relationship differs from the rest
+    must pull beta toward that subset's pattern, not leave it unchanged."""
+    rng = np.random.default_rng(6)
+    n = 4000
+    p = rng.uniform(0.02, 0.98, n)
+    x = np.log(p / (1 - p))
+    # first half: beta=1.0 (well-calibrated); second half: beta=2.0 (steeper)
+    half = n // 2
+    pi = np.empty(n)
+    pi[:half] = 1 / (1 + np.exp(-(0.0 + 1.0 * x[:half])))
+    pi[half:] = 1 / (1 + np.exp(-(0.0 + 2.0 * x[half:])))
+    y = rng.binomial(1, pi).astype(float)
+
+    w_first_half = np.concatenate([np.full(half, 10.0), np.full(n - half, 0.1)])
+    w_second_half = np.concatenate([np.full(half, 0.1), np.full(n - half, 10.0)])
+    fit_first = fit_calibration_regression(p, y, weights=w_first_half)
+    fit_second = fit_calibration_regression(p, y, weights=w_second_half)
+    assert fit_second["beta"] > fit_first["beta"] + 0.3
+
+
 def test_calibration_stat_fn_through_event_bootstrap():
     df = _synthetic_calibration_df(n_per_cat=100, categories=("Politics",))
     result = event_bootstrap(df, calibration_stat_fn, B=100, seed=0)

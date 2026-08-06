@@ -1,0 +1,40 @@
+====================== W3b RECONCILIATION GRID ======================
+
+No Clock axis (see src/calibration/grid.py docstring): W3a found A vs B overlapping
+in 21/21 cells on both samples, and without tercile stratification the clock variable
+never enters fit_calibration_regression at all -- it would have been a no-op here.
+Fixed at ex-ante; the ran-to-term restriction lives in the Sample axis instead.
+
+PERIOD OVERLAP CAVEAT: 2024 and 2025 are NOT independent samples -- a market open
+across the year boundary contributes rows (same market, same eventual outcome) to both
+period cells. Cluster overlap per sample level (coalesce(event_id, market_id)):
+  all                    2024=1592   2025=6240   overlap=282    (=17.7% of 2024, 4.5% of 2025)
+  ex_Sports              2024=1402   2025=3710   overlap=242    (=17.3% of 2024, 6.5% of 2025)
+  top_liquidity_tercile  2024=360    2025=2109   overlap=96     (=26.7% of 2024, 4.6% of 2025)
+  ran_to_term            2024=1083   2025=4612   overlap=222    (=20.5% of 2024, 4.8% of 2025)
+  Any 2024-vs-2025 beta difference below should be read with this overlap in mind --
+  a large shared-cluster share means the two period cells are not resampling disjoint units.
+
+[1] full grid (weighting x sample x period), 16 cells:
+  all                    2024  equal            n=11490   n_clusters=1592   beta=1.177 CI=[1.096, 1.265]
+  all                    2024  volume_weighted  n=11490   n_clusters=1592   beta=1.229 CI=[0.701, 1.829]
+  all                    2025  equal            n=40820   n_clusters=6240   beta=1.088 CI=[1.040, 1.136]
+  all                    2025  volume_weighted  n=40820   n_clusters=6240   beta=0.974 CI=[0.836, 1.151]
+  ex_Sports              2024  equal            n=8988    n_clusters=1402   beta=1.218 CI=[1.123, 1.327]
+  ex_Sports              2024  volume_weighted  n=8988    n_clusters=1402   beta=1.204 CI=[0.596, 2.133]
+  ex_Sports              2025  equal            n=24529   n_clusters=3710   beta=1.143 CI=[1.083, 1.210]
+  ex_Sports              2025  volume_weighted  n=24529   n_clusters=3710   beta=0.961 CI=[0.812, 1.152]
+  ran_to_term            2024  equal            n=6135    n_clusters=1083   beta=1.332 CI=[1.218, 1.472]
+  ran_to_term            2024  volume_weighted  n=6135    n_clusters=1083   beta=2.068 CI=[0.773, 4.413]
+  ran_to_term            2025  equal            n=22113   n_clusters=4612   beta=1.078 CI=[1.014, 1.147]
+  ran_to_term            2025  volume_weighted  n=22113   n_clusters=4612   beta=0.915 CI=[0.725, 1.214]
+  top_liquidity_tercile  2024  equal            n=3829    n_clusters=360    beta=1.062 CI=[0.932, 1.221]
+  top_liquidity_tercile  2024  volume_weighted  n=3829    n_clusters=360    beta=1.226 CI=[0.692, 1.891]
+  top_liquidity_tercile  2025  equal            n=13611   n_clusters=2109   beta=0.996 CI=[0.923, 1.080]
+  top_liquidity_tercile  2025  volume_weighted  n=13611   n_clusters=2109   beta=0.970 CI=[0.825, 1.146]
+
+  dropped-row accounting (W2's exclusion, for reference): {'loaded': 52388, 'dropped_null_y': 78, 'dropped_ambiguous': 78, 'dropped_total': 78, 'kept': 52310}
+
+  figure written to /Users/angelomarano/Desktop/Progetti personali/pm-calibration/reports/figures/w3b_design_sensitivity.png
+
+====================================================================

@@ -101,19 +101,36 @@ Gate A-D pattern.
 
 ## 3. W3b — The reconciliation grid
 
-Pooled ex-Sports, all 36 cells:
+**Superseded from the original 3-clock design** (see DECISIONS.md): W3a found
+A vs B overlapping in 21/21 cells on both the full and ran-to-term samples --
+the clock axis doesn't move the estimate on this panel. It also turned out to
+be a no-op by construction: without tercile stratification (which this grid
+doesn't have), `fit_calibration_regression` never reads the horizon column at
+all, so A vs B would have produced two identical numbers per cell regardless
+of which was named. The clock is fixed at ex-ante (non-anticipative, this
+project's default throughout); the ran-to-term restriction moves into the
+Sample axis instead, where it actually changes something -- which rows are in
+the cell.
+
+Pooled, all levels independent (not nested inside each other), 16 cells:
 
 | Axis | Levels |
 |---|---|
 | Weighting | equal, volume-weighted |
-| Clock | ex-ante (A), ex-post (B), ran-to-term (C) |
-| Sample | all, ex-Sports, top liquidity tercile |
+| Sample | all, ex-Sports, top-liquidity-tercile, ran-to-term |
 | Period | 2024, 2025 |
 
-Note the sample axis interacts with the pooled scope: "all" includes Sports,
-"ex-Sports" is the headline population, "top liquidity tercile" tests whether
-the effect concentrates in thin markets. Period splits test stability across
-the 2024 election cycle versus 2025.
+Each Sample level filters the full panel independently: "all" is unrestricted
+(Sports included), "ex-Sports" excludes Sports, "top-liquidity-tercile" and
+"ran-to-term" are their own restrictions and may include Sports too -- they
+are not sub-slices of "ex-Sports". "top-liquidity-tercile" tests whether the
+effect concentrates in thin markets; "ran-to-term" (W3a's `A_term`/`B_term`
+restriction, reused verbatim) tests whether it's driven by early resolvers.
+Period splits test stability across the 2024 election cycle versus 2025 --
+note this is not a split into independent samples: a market open across the
+year boundary contributes rows to both period cells. Report, per sample
+level, how many clusters appear in both period cells (`period_overlap_stats`),
+so any 2024-vs-2025 comparison carries that caveat with it.
 
 Output: one row per cell with β, CI, n, n_clusters, LOW_POWER. Plus a
 **design-sensitivity figure**: β with CI across cells, grouped so the reader
@@ -123,6 +140,11 @@ Weighted IRLS: extend `fit_calibration_regression` with an optional `weights`
 argument (default None preserving current behavior exactly, with a test
 asserting that). Weights are `volume_num` normalized within the cell. The
 existing quasi-separation safeguard applies unchanged.
+
+Gate E's reconciliation check against W2d's headline (§5.5, pooled ex-Sports,
+equal weight, full period) is done as a standalone call in Gate E's script,
+not as a 17th grid cell -- this grid has no "full period" level, and adding
+one only to cover a single check isn't worth tripling that axis's cost.
 
 ## 4. W3c — Per-category weighting cut
 

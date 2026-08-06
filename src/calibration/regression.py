@@ -65,8 +65,17 @@ def _logit(p: np.ndarray) -> np.ndarray:
     return np.log(p / (1 - p))
 
 
-def fit_calibration_regression(p: np.ndarray, y: np.ndarray, max_iter: int = 25, tol: float = 1e-8) -> dict[str, float]:
+def fit_calibration_regression(
+    p: np.ndarray, y: np.ndarray, weights: np.ndarray | None = None, max_iter: int = 25, tol: float = 1e-8
+) -> dict[str, float]:
     """Hand-rolled IRLS fit of logit(P(y=1)) = alpha + beta*logit(p).
+    weights (optional): per-row case weights, multiplied into the IRLS
+    weight each iteration. None (default) preserves the original
+    unweighted behavior exactly -- see test_regression.py's byte-identical
+    check. WLS normal equations are invariant to a uniform rescaling of
+    weights ((X'WX)b = X'Wz scales both sides by the same constant), so
+    "normalize weights within the cell" (W3b) is a presentation choice,
+    not something that changes beta.
     Returns {alpha, beta, converged, n_iter}. alpha/beta are the as-fitted
     values regardless of converged (callers needing the NaN-signaling
     contract for event_bootstrap should use calibration_stat_fn, not this
@@ -82,8 +91,9 @@ def fit_calibration_regression(p: np.ndarray, y: np.ndarray, max_iter: int = 25,
         eta = X @ beta
         pi = 1 / (1 + np.exp(-eta))
         pi = np.clip(pi, PI_FIT_EPS, 1 - PI_FIT_EPS)
-        w = pi * (1 - pi)
-        z = eta + (y - pi) / w
+        w0 = pi * (1 - pi)  # base GLM variance weight -- z's linearization depends on this alone
+        z = eta + (y - pi) / w0
+        w = w0 if weights is None else w0 * weights  # case weights enter only the WLS solve, not z
         WX = X * w[:, None]
         try:
             beta_new = np.linalg.solve(X.T @ WX, X.T @ (w * z))
