@@ -1,9 +1,19 @@
 ===================== W3a CLOCK COMPARISON =====================
 
-Descriptive only. Clock B/B_full/B_term are reproduced to show what the
-literature's ex-post clock does on this panel -- NOT endorsed as a valid
-design here. Any pattern below is a checkpoint for the stopping-time
-hypothesis, not this project's estimate.
+SUMMARY: clock choice barely moves the estimate on this panel.
+  A_full vs B_full:  21/21 cells overlap (ex-post clock ~= ex-ante clock, full sample)
+  A_term vs B_term:  21/21 cells overlap (ex-post clock ~= ex-ante clock, ran-to-term sample)
+  There was no sharp A/B divergence to explain in the first place -- so A_term ~= B_term
+  is NOT on its own a confirmation of the stopping-time story.
+
+  What DOES move: which markets are in the sample, holding the clock fixed.
+  A_full vs A_term:  19/21 cells overlap
+  B_full vs B_term:  20/21 cells overlap
+  See [6]/[7] for whether that movement survives the (much wider) ran-to-term CIs
+  or is small-sample noise, before citing it as sample-composition selection.
+
+Descriptive only throughout. Clock B/B_full/B_term are reproduced to show what the
+literature's ex-post clock does on this panel -- NOT endorsed as a valid design here.
 
 [1] ran-to-term restriction: share of rows dropped (used by A_term/B_term):
   Crypto         kept=3087  /4096   (dropped 24.6%)
@@ -132,11 +142,11 @@ hypothesis, not this project's estimate.
   Sports         B_term  not monotonically rising
 
 [4] prediction check: does A_term ~= B_term per (category, tercile)?
-  If the A_full/B_full gap is stopping-time selection, A_term and B_term should
-  nearly coincide here (the two clocks' underlying values are ~equal on the
-  ran-to-term subset by construction). Divergence means another explanation is needed.
+  If the A_full/B_full gap were stopping-time selection, A_term and B_term should nearly
+  coincide here. But see the SUMMARY above: there was little A/B gap to begin with, so
+  this match is not on its own a confirmation.
 
-  21/21 (category, tercile) cells have overlapping CIs (A_term ~= B_term holds)
+  21/21 (category, tercile) cells have overlapping CIs (A_term ~= B_term)
     Crypto         t1  A_term_beta=1.436  B_term_beta=1.431  diff=+0.005  [MATCH]
     Crypto         t2  A_term_beta=1.213  B_term_beta=1.191  diff=+0.022  [MATCH]
     Crypto         t3  A_term_beta=1.381  B_term_beta=1.385  diff=-0.003  [MATCH]
@@ -159,7 +169,11 @@ hypothesis, not this project's estimate.
     Sports         t2  A_term_beta=0.885  B_term_beta=0.877  diff=+0.008  [MATCH]
     Sports         t3  A_term_beta=0.505  B_term_beta=0.507  diff=-0.003  [MATCH]
 
-[5] context: A_full vs B_full (the raw literature-clock gap this whole comparison explains):
+[5] context: A_full vs B_full (the raw literature-clock gap this whole comparison was built to explain):
+  Also overlapping everywhere -- the premise that this project's ex-ante clock and the
+  literature's ex-post clock diverge sharply on this panel does not hold up either.
+
+  21/21 (category, tercile) cells have overlapping CIs (A_full ~= B_full)
     Crypto         t1  A_full_beta=1.075  B_full_beta=1.215  diff=-0.140  [MATCH]
     Crypto         t2  A_full_beta=1.005  B_full_beta=1.058  diff=-0.053  [MATCH]
     Crypto         t3  A_full_beta=1.190  B_full_beta=1.080  diff=+0.110  [MATCH]
@@ -181,6 +195,62 @@ hypothesis, not this project's estimate.
     Sports         t1  A_full_beta=0.989  B_full_beta=1.067  diff=-0.079  [MATCH]
     Sports         t2  A_full_beta=0.922  B_full_beta=0.988  diff=-0.066  [MATCH]
     Sports         t3  A_full_beta=0.919  B_full_beta=0.813  diff=+0.105  [MATCH]
+
+[6] A_full vs A_term: does the ran-to-term restriction itself move the ex-ante-clock estimate?
+  This is where the real movement is (e.g. Politics: non-monotonic on A_full, cleanly rising
+  on A_term; Sports t3 collapses to 0.505). DIFFERS cells below are early-resolver selection
+  showing up as sample composition, not clock contamination -- IF they clear this overlap
+  check, given A_term's much wider CIs from the smaller restricted sample.
+
+  19/21 (category, tercile) cells have overlapping CIs (A_full ~= A_term)
+    Crypto         t1  A_full_beta=1.075  A_term_beta=1.436  diff=-0.361  [MATCH]
+    Crypto         t2  A_full_beta=1.005  A_term_beta=1.213  diff=-0.208  [MATCH]
+    Crypto         t3  A_full_beta=1.190  A_term_beta=1.381  diff=-0.191  [MATCH]
+    Culture        t1  A_full_beta=1.064  A_term_beta=1.003  diff=+0.062  [MATCH]
+    Culture        t2  A_full_beta=1.208  A_term_beta=1.243  diff=-0.035  [MATCH]
+    Culture        t3  A_full_beta=1.011  A_term_beta=0.735  diff=+0.276  [MATCH]
+    Econ/Finance   t1  A_full_beta=1.253  A_term_beta=1.261  diff=-0.008  [MATCH]
+    Econ/Finance   t2  A_full_beta=1.391  A_term_beta=1.445  diff=-0.054  [MATCH]
+    Econ/Finance   t3  A_full_beta=1.413  A_term_beta=1.425  diff=-0.011  [MATCH]
+    Geopolitics    t1  A_full_beta=1.120  A_term_beta=1.167  diff=-0.047  [MATCH]
+    Geopolitics    t2  A_full_beta=1.311  A_term_beta=1.544  diff=-0.234  [MATCH]
+    Geopolitics    t3  A_full_beta=1.584  A_term_beta=1.965  diff=-0.381  [MATCH]
+    Other          t1  A_full_beta=1.168  A_term_beta=1.176  diff=-0.009  [MATCH]
+    Other          t2  A_full_beta=1.322  A_term_beta=1.873  diff=-0.551  [MATCH]
+    Other          t3  A_full_beta=1.052  A_term_beta=0.629  diff=+0.423  [MATCH]
+    Politics       t1  A_full_beta=1.192  A_term_beta=1.332  diff=-0.140  [MATCH]
+    Politics       t2  A_full_beta=1.061  A_term_beta=1.465  diff=-0.404  [DIFFERS]
+    Politics       t3  A_full_beta=1.185  A_term_beta=1.606  diff=-0.422  [MATCH]
+    Sports         t1  A_full_beta=0.989  A_term_beta=0.906  diff=+0.083  [MATCH]
+    Sports         t2  A_full_beta=0.922  A_term_beta=0.885  diff=+0.037  [MATCH]
+    Sports         t3  A_full_beta=0.919  A_term_beta=0.505  diff=+0.414  [DIFFERS]
+
+[7] B_full vs B_term: same restriction, ex-post clock -- same mechanism should show up here too:
+  If [6]'s movement is genuinely about which markets survive the restriction (not the clock),
+  the same DIFFERS pattern should appear here, on a different clock, for the same categories.
+
+  20/21 (category, tercile) cells have overlapping CIs (B_full ~= B_term)
+    Crypto         t1  B_full_beta=1.215  B_term_beta=1.431  diff=-0.216  [MATCH]
+    Crypto         t2  B_full_beta=1.058  B_term_beta=1.191  diff=-0.133  [MATCH]
+    Crypto         t3  B_full_beta=1.080  B_term_beta=1.385  diff=-0.305  [MATCH]
+    Culture        t1  B_full_beta=1.069  B_term_beta=1.000  diff=+0.069  [MATCH]
+    Culture        t2  B_full_beta=1.236  B_term_beta=1.238  diff=-0.002  [MATCH]
+    Culture        t3  B_full_beta=1.013  B_term_beta=0.837  diff=+0.176  [MATCH]
+    Econ/Finance   t1  B_full_beta=1.197  B_term_beta=1.223  diff=-0.026  [MATCH]
+    Econ/Finance   t2  B_full_beta=1.449  B_term_beta=1.420  diff=+0.029  [MATCH]
+    Econ/Finance   t3  B_full_beta=1.359  B_term_beta=1.437  diff=-0.078  [MATCH]
+    Geopolitics    t1  B_full_beta=1.162  B_term_beta=1.134  diff=+0.028  [MATCH]
+    Geopolitics    t2  B_full_beta=1.186  B_term_beta=1.574  diff=-0.388  [MATCH]
+    Geopolitics    t3  B_full_beta=1.831  B_term_beta=2.024  diff=-0.193  [MATCH]
+    Other          t1  B_full_beta=1.256  B_term_beta=1.277  diff=-0.021  [MATCH]
+    Other          t2  B_full_beta=1.385  B_term_beta=1.484  diff=-0.099  [MATCH]
+    Other          t3  B_full_beta=0.906  B_term_beta=0.723  diff=+0.182  [MATCH]
+    Politics       t1  B_full_beta=1.186  B_term_beta=1.329  diff=-0.143  [MATCH]
+    Politics       t2  B_full_beta=1.090  B_term_beta=1.488  diff=-0.399  [DIFFERS]
+    Politics       t3  B_full_beta=1.191  B_term_beta=1.587  diff=-0.395  [MATCH]
+    Sports         t1  B_full_beta=1.067  B_term_beta=0.920  diff=+0.147  [MATCH]
+    Sports         t2  B_full_beta=0.988  B_term_beta=0.877  diff=+0.111  [MATCH]
+    Sports         t3  B_full_beta=0.813  B_term_beta=0.507  diff=+0.306  [MATCH]
 
   dropped-row accounting (W2's exclusion, for reference): {'loaded': 52388, 'dropped_null_y': 78, 'dropped_ambiguous': 78, 'dropped_total': 78, 'kept': 52310}
 
