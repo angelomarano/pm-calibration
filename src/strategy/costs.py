@@ -6,31 +6,65 @@ input below is reported as a band, never collapsed to one number, so the
 report shows the actual uncertainty rather than hiding it behind a
 plausible-looking single figure.
 
---- FEE FORMULA: two disputed variants, both always reported ---
+--- FEE FORMULA: resolved (with one flagged residual tension) ---
 
-Polymarket's public documentation states the taker fee as
-    fee = C * feeRate * p * (1 - p)
--- quadratic in price, peaking at p=0.5, shrinking toward zero at the
-extremes (marketmath.io, "Polymarket Fees Explained: Per-Category Taker
-Fees (2026)").
+2026-08-08 investigation (time-boxed ~30 min, see DECISIONS.md): three
+candidate formulas were in play --
+  (1) documented quadratic: fee = C * feeRate * p * (1-p)
+      (docs.polymarket.com/trading/fees)
+  (2) a "contract" formula quoted in Polymarket/py-clob-client GitHub
+      issue #326: fee = feeRateBps * min(p,1-p) * outcomeTokens /
+      (p * BPS_DIVISOR)
+  (3) a simpler linear formula, fee = C * feeRate * (1-p), which the
+      same issue's reporter found matched 5 real on-chain BUY fills
+      (NHL/MLB/NBA/ATP) to 0-1% error, using the rate documented AT THE
+      TIME (April 2026).
 
-Polymarket's deployed on-chain contract computes it differently:
-    fee = feeRateBps * min(p, 1-p) * outcomeTokens / (p * BPS_DIVISOR)
-(Polymarket/py-clob-client GitHub issue #326, which reports the
-documentation/contract discrepancy directly, with worked examples). This
-does NOT shrink to zero in the tails: as p -> 0 or p -> 1, min(p,1-p)/p
--> 1, so the contract's fee multiplier approaches the FULL rate exactly
-where R1 trades (p in [0.02,0.10] or [0.90,0.98]).
+Resolution: fetched docs.polymarket.com/trading/fees directly (through
+this project's DNS-pinned session -- the domain is affected by the same
+ISP-level block as clob/gamma) and checked formula (1) against
+Polymarket's OWN official worked-example table ("Fee Tables, 100 Shares")
+across its full price grid, not just one point: at every price checked
+(p=0.05, 0.10, 0.25, 0.50, 0.90), C * feeRate * p * (1-p) reproduces the
+table's USDC fee to the cent (e.g. crypto, p=0.50: 100*0.07*0.5*0.5=1.75,
+table says $1.75). That is Polymarket's own live, self-consistent,
+current documentation -- the strongest verification available without a
+funded live order of our own.
 
-The ratio contract/documented = 1/(p*(1-p)) is independent of the rate
-and ranges from ~11x at p=0.10/0.90 to ~51x at p=0.02/0.98 across R1's
-entire trading range (verified 2026-08-08) -- the single largest source
-of uncertainty in this cost model. fee_cost returns both variants always;
-the deployed contract is what actually executes trades, so its variant is
-the conservative default, and the documented variant is the optimistic
-bound. If R1's edge survives under the contract variant, the result is
-robust to the dispute; if it only survives under the documented one, that
-must be stated plainly, never buried.
+Formula (2), the GitHub-issue-quoted "contract" formula, matches NEITHER
+the official worked table NOR the reporter's own real fills (checked
+directly: at their MLB example, p=0.65, rate=0.03, it predicts 0.0808
+shares of fee against an actual 0.0525) -- rejected by two independent
+sources, kept below ONLY as a labeled, discredited footnote in case a
+future reader wants the number.
+
+RESIDUAL, UNRESOLVED TENSION (flagged, not swept under the rug): formula
+(3) reproduces the April-2026 real fills exactly, and formula (1) is
+what's live now -- these could both be right if the underlying mechanism
+changed between the report and now without a formula being announced, or
+the April report's own ATP/NBA rows (where "ordered" shares were already
+non-integer, e.g. 5.07/5.26) may have pre-compensated for an assumed fee
+in the order sizing, making that comparison partly circular; the cleaner
+NHL/MLB rows don't have this issue. Not resolved further within the
+time-box. If this later turns out to matter, the fix is cheap: formula
+(3)'s multiplier is a fourth key to add to fee_cost's returned dict.
+
+fee_cost therefore returns TWO fee estimates (not four): "base"/"upper"
+(rate source, unchanged from before) both computed under formula (1),
+plus "footnote_contract_formula_base"/"..._upper" under the REJECTED
+formula (2), retained only as a labeled footnote per the resolution
+above -- not a live sensitivity band.
+
+Also surfaced during this investigation, relevant to whoever wires this
+into W4b: R1's frozen rule (§1.1) means BOTH legs buy a token priced near
+certainty. The favorite leg buys Yes directly at p in [0.90,0.98]. The
+longshot leg buys NO (betting against the longshot), which trades at
+(1 - p_yes) -- also in [0.90,0.98], not at the snapshot's own low p. The
+`price` argument passed into fee_cost must be the price of the token
+ACTUALLY BOUGHT, not the panel's raw p column, or the fee magnitude will
+be badly wrong in exactly the direction that would understate cost on
+the longshot leg (since p*(1-p) and the rejected formula both depend on
+which side's price is used).
 
 --- FEE RATE: published category schedule (base case) vs. the ingested
     field (upper-bound sensitivity only) ---
@@ -49,13 +83,13 @@ the field is a contract-level configuration ceiling, not the rate
 actually charged. Used ONLY as an upper-bound sensitivity band
 (rate_upper), never as the base case.
 
-Base case instead uses the published "Fee Structure V2" (2026-03-30)
-per-category schedule (marketmath.io, same source as the formula above --
-table: politics/finance/tech/mentions 0.04; sports/economics/culture/
-weather/other 0.05; crypto 0.07; geopolitics 0, confirmed EXPLICITLY
-stated as exempt -- "Geopolitics and world-events markets charge no
-taker fee and no maker fee at any price" -- not merely absent from the
-table).
+Base case instead uses the published per-category schedule, confirmed
+directly from docs.polymarket.com/trading/fees (the same fetch that
+resolved the formula above): crypto 0.07; sports 0.05; finance/politics/
+mentions/tech 0.04; economics/culture/weather/other 0.05; geopolitics 0,
+confirmed EXPLICITLY stated as exempt -- "Geopolitical and world events
+markets are fee-free. Polymarket does not charge fees or profit from
+trading activity on these markets" -- not merely absent from the table.
 
 This project's 7-category taxonomy is coarser than V2's finer split, so
 two categories require a resolved approximation, documented rather than
@@ -135,32 +169,37 @@ def fee_cost(
     taker_base_fee: float,
     notional: float = 1.0,
 ) -> dict[str, float]:
-    """Returns all four combinations of {rate source} x {formula},
-    always, never collapsed to one number:
-      - base_contract, base_documented: published V2 category rate
-      - upper_contract, upper_documented: ingested taker_base_fee / 1e4
-    (upper-bound sensitivity only, see module docstring)
-    contract = rate * min(p,1-p)/p (what the deployed contract executes).
-    documented = rate * p*(1-p) (Polymarket's written docs).
-    All four are 0.0 if is_fee_bearing is False -- every in-sample
-    (2024-2025) trade is therefore unconditionally all-zero, since no fee
-    regime existed yet.
+    """Returns four keys, never collapsed to one number:
+      - base: published per-category rate, resolved formula (1)
+        (p*(1-p) -- confirmed against Polymarket's own live worked-example
+        table, see module docstring)
+      - upper: ingested taker_base_fee / 1e4, same resolved formula
+        (upper-bound rate sensitivity only, see module docstring)
+      - footnote_contract_formula_base / _upper: same two rate sources,
+        under the REJECTED "contract" formula (min(p,1-p)/p) -- retained
+        only as a labeled footnote per the investigation's resolution,
+        not a live sensitivity band.
+    `price` must be the price of the token actually bought (see module
+    docstring's note on R1's two legs), not necessarily the panel's raw
+    p column. All four keys are 0.0 if is_fee_bearing is False -- every
+    in-sample (2024-2025) trade is therefore unconditionally all-zero,
+    since no fee regime existed yet.
     """
     if not is_fee_bearing(category, created_at):
-        return {"base_contract": 0.0, "base_documented": 0.0, "upper_contract": 0.0, "upper_documented": 0.0}
+        return {"base": 0.0, "upper": 0.0, "footnote_contract_formula_base": 0.0, "footnote_contract_formula_upper": 0.0}
 
     p = min(max(price, FEE_PRICE_EPS), 1 - FEE_PRICE_EPS)
-    contract_mult = min(p, 1 - p) / p
-    documented_mult = p * (1 - p)
+    resolved_mult = p * (1 - p)
+    rejected_mult = min(p, 1 - p) / p
 
     rate_base = CATEGORY_FEE_RATE.get(category, 0.0)
     rate_upper = taker_base_fee / TAKER_BASE_FEE_BPS_DIVISOR
 
     return {
-        "base_contract": notional * rate_base * contract_mult,
-        "base_documented": notional * rate_base * documented_mult,
-        "upper_contract": notional * rate_upper * contract_mult,
-        "upper_documented": notional * rate_upper * documented_mult,
+        "base": notional * rate_base * resolved_mult,
+        "upper": notional * rate_upper * resolved_mult,
+        "footnote_contract_formula_base": notional * rate_base * rejected_mult,
+        "footnote_contract_formula_upper": notional * rate_upper * rejected_mult,
     }
 
 

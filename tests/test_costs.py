@@ -43,31 +43,48 @@ def test_is_fee_bearing_in_sample_always_false():
 def test_fee_cost_in_sample_market_is_all_zero():
     in_sample_date = datetime(2024, 3, 1, tzinfo=timezone.utc)
     fees = fee_cost("Crypto", in_sample_date, price=0.05, taker_base_fee=1000.0, notional=100.0)
-    assert fees == {"base_contract": 0.0, "base_documented": 0.0, "upper_contract": 0.0, "upper_documented": 0.0}
+    assert fees == {
+        "base": 0.0,
+        "upper": 0.0,
+        "footnote_contract_formula_base": 0.0,
+        "footnote_contract_formula_upper": 0.0,
+    }
 
 
 def test_fee_cost_hand_computed_at_p_05_sports():
-    """Sports rate=0.05 (published V2), created after 2026-02-18. At
-    p=0.05: contract mult = min(0.05,0.95)/0.05 = 1.0; documented mult =
-    0.05*0.95 = 0.0475."""
+    """Sports rate=0.05 (published, confirmed against Polymarket's own
+    worked-example table), created after 2026-02-18. At p=0.05: resolved
+    (p*(1-p)) mult = 0.05*0.95 = 0.0475; rejected (min(p,1-p)/p) mult =
+    min(0.05,0.95)/0.05 = 1.0."""
     created = datetime(2026, 3, 1, tzinfo=timezone.utc)
     fees = fee_cost("Sports", created, price=0.05, taker_base_fee=1000.0, notional=100.0)
-    assert fees["base_contract"] == pytest.approx(100.0 * 0.05 * 1.0)
-    assert fees["base_documented"] == pytest.approx(100.0 * 0.05 * 0.0475)
+    assert fees["base"] == pytest.approx(100.0 * 0.05 * 0.0475)
+    assert fees["footnote_contract_formula_base"] == pytest.approx(100.0 * 0.05 * 1.0)
 
 
-def test_fee_cost_contract_over_documented_ratio_is_1_over_p_times_1_minus_p():
-    """The contract/documented ratio cancels the rate entirely -- it's
+def test_fee_cost_matches_official_worked_example_table():
+    """Verified 2026-08-08 against docs.polymarket.com/trading/fees'
+    "Fee Tables (100 Shares)" grid directly, crypto column (rate=0.07):
+    p=0.50 -> $1.75, p=0.10 -> $0.63, p=0.25 -> $1.31 (to the cent)."""
+    created = datetime(2026, 4, 1, tzinfo=timezone.utc)
+    for p, expected_usdc in [(0.50, 1.75), (0.10, 0.63), (0.25, 1.31)]:
+        fees = fee_cost("Crypto", created, price=p, taker_base_fee=1000.0, notional=100.0)
+        assert fees["base"] == pytest.approx(expected_usdc, abs=0.005)
+
+
+def test_fee_cost_rejected_formula_over_resolved_ratio_is_1_over_p_times_1_minus_p():
+    """The rejected/resolved ratio cancels the rate entirely -- it's
     1/(p*(1-p)), independent of category. Spot-check at R1's two tail
-    buckets: ~11x at p=0.10, ~51x at p=0.02."""
+    buckets: ~11x at p=0.10, ~51x at p=0.02. Kept only to document how
+    large the now-rejected formula would have been, not as a live band."""
     created = datetime(2026, 4, 1, tzinfo=timezone.utc)
     fees_p10 = fee_cost("Crypto", created, price=0.10, taker_base_fee=1000.0)
     fees_p02 = fee_cost("Crypto", created, price=0.02, taker_base_fee=1000.0)
-    ratio_p10 = fees_p10["base_contract"] / fees_p10["base_documented"]
-    ratio_p02 = fees_p02["base_contract"] / fees_p02["base_documented"]
+    ratio_p10 = fees_p10["footnote_contract_formula_base"] / fees_p10["base"]
+    ratio_p02 = fees_p02["footnote_contract_formula_base"] / fees_p02["base"]
     assert ratio_p10 == pytest.approx(1 / (0.10 * 0.90), rel=1e-6)
     assert ratio_p02 == pytest.approx(1 / (0.02 * 0.98), rel=1e-6)
-    assert ratio_p02 > ratio_p10  # deeper tail -> wider dispute
+    assert ratio_p02 > ratio_p10  # deeper tail -> wider gap from the rejected formula
 
 
 def test_fee_cost_upper_band_uses_ingested_taker_base_fee():
@@ -75,9 +92,8 @@ def test_fee_cost_upper_band_uses_ingested_taker_base_fee():
     fees = fee_cost("Geopolitics", created, price=0.05, taker_base_fee=1000.0, notional=100.0)
     # base rate for Geopolitics is 0 (published exemption), but the ingested-field
     # upper bound is NOT zero -- exactly the discrepancy this bound exists to surface
-    assert fees["base_contract"] == 0.0
-    assert fees["base_documented"] == 0.0
-    assert fees["upper_contract"] == pytest.approx(100.0 * 0.10 * 1.0)
+    assert fees["base"] == 0.0
+    assert fees["upper"] == pytest.approx(100.0 * 0.10 * 0.0475)
 
 
 def test_geopolitics_base_rate_is_zero():
@@ -112,7 +128,7 @@ def test_total_cost_components_sum_to_total():
         annual_rate_pct=5.0,
         notional=100.0,
     )
-    for key in ("base_contract", "base_documented", "upper_contract", "upper_documented"):
+    for key in ("base", "upper", "footnote_contract_formula_base", "footnote_contract_formula_upper"):
         expected = result[f"fee_{key}"] + result["spread"] + result["carry"]
         assert result[f"total_{key}"] == pytest.approx(expected)
 
@@ -130,6 +146,6 @@ def test_total_cost_in_sample_has_zero_fee_but_nonzero_spread_and_carry():
         annual_rate_pct=5.0,
         notional=100.0,
     )
-    assert result["fee_base_contract"] == 0.0
+    assert result["fee_base"] == 0.0
     assert result["spread"] > 0.0
     assert result["carry"] > 0.0

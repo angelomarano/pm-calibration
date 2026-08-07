@@ -210,3 +210,50 @@ Polymarket's documented p*(1-p) formula vs. its deployed contract's
 min(p,1-p)/p, which diverge sharply exactly at R1's tail trading points)
 therefore matters for the OOS cost accounting, not a second-order detail
 to wave through.
+
+2026-08-08 — W4a fee formula, time-boxed (~30 min) investigation:
+resolved, with one flagged residual tension. Fetched
+docs.polymarket.com/trading/fees directly (through this project's
+DNS-pinned session — the domain sits behind the same ISP-level block as
+clob/gamma). Two corrections to the previous entry's numbers first: the
+official table gives Sports = 0.05, not the 0.03 quoted there (that 0.03
+came from a since-superseded reading of a GitHub issue filed against an
+earlier version of the docs); the official per-category table is crypto
+0.07, sports 0.05, finance/politics/mentions/tech 0.04,
+economics/culture/weather/other 0.05, geopolitics 0 (explicitly stated
+fee-free, not merely absent).
+
+Formula: checked the documented fee = C*feeRate*p*(1-p) against
+Polymarket's own worked-example table ("Fee Tables, 100 Shares") across
+its full price grid (p=0.05/0.10/0.25/0.50/0.90) — matches the table's
+USDC fee to the cent at every point checked. That table is Polymarket's
+own live, internally self-consistent documentation, the strongest
+verification available short of a funded live order. The "contract"
+formula quoted in Polymarket/py-clob-client issue #326
+(min(p,1-p)/p) matches NEITHER that table NOR the issue's own reported
+real fills — rejected by two independent sources, demoted to a labeled
+footnote in fee_cost, not a live band. Base case is now the documented
+p*(1-p) formula with the corrected rate table above.
+
+Residual tension, not resolved further within the time-box: issue #326's
+reporter measured 5 real on-chain BUY fills (NHL/MLB/NBA/ATP) matching a
+simpler linear fee = C*feeRate*(1-p) to 0-1% error, using the rate
+documented in April 2026. That contradicts the p*(1-p) resolution above.
+Possible explanations neither confirmed nor ruled out: the rate or
+formula changed between April and now without an announcement, or the
+reporter's NBA/ATP rows (non-integer "ordered" share counts, e.g.
+5.07/5.26) may have already absorbed an assumed fee into their order
+sizing, making that specific comparison partly circular — their NHL/MLB
+rows don't have this issue and still support the linear reading. Flagged
+in costs.py's docstring; not built as a third live band, since the
+official table's full-grid match is stronger evidence and adding a third
+band would over-complicate the matrix for a residual doubt this specific.
+
+Also surfaced, relevant to W4b: R1's frozen rule means BOTH legs buy a
+token priced near certainty — the favorite leg buys Yes at p in
+[0.90,0.98] directly, and the longshot leg buys NO (betting against the
+longshot), which trades at (1 - p_yes), also in [0.90,0.98], not at the
+snapshot's own low p. Whoever wires fee_cost into R1's mechanics must
+pass the price of the token actually bought, not the panel's raw p
+column, or the longshot leg's fee will be computed at the wrong end of
+the price range.
