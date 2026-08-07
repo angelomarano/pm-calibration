@@ -173,3 +173,40 @@ market-level inference ("you discarded millions of observations"): on
 this data, the trade-weighted design has less effective information, not
 more. Quantified on the same panel, same estimator, same bootstrap — the
 only thing that changes is the weighting.
+
+2026-08-08 — W4a: fees_enabled/taker_base_fee (Gamma fields) are a
+point-in-time snapshot of CURRENT market configuration at ingestion time
+(pulled July 2026, after Polymarket's full fee rollout), not a historical
+record of what a trader would have paid entering a market on any earlier
+date. Confirmed empirically before assuming otherwise: every
+fees_enabled=True row across all 7 categories carries the identical
+taker_base_fee=1000 (bps units, confirmed via a Polymarket py-clob-client
+GitHub issue), including all 323 Geopolitics rows — directly
+contradicting Polymarket's own 2026-03-30 "Fee Structure V2" announcement,
+which describes differentiated per-category rates (crypto 7%, sports 3%,
+finance/politics/mentions/tech 4%, economics/culture/weather/other 5%,
+geopolitics not listed). Using fees_enabled directly would have applied
+2026 fee configuration retroactively to 2024-2025 in-sample trades, which
+never faced any fee regime at all.
+
+Fixed with a temporal rule instead of the flag: a position's fee applies
+only if its market's created_at postdates that market's category's fee
+activation date. Dates externally verified rather than taken from memory
+(this repo's own Gate A/M2 notes only had the two later ones, not the
+crypto date): Crypto 2026-01-05 (15-minute markets first), Sports
+2026-02-18 (pilot: NCAA basketball + Serie A initially), all other
+categories under the broad V2 rollout, 2026-03-30. In-sample (2024-2025):
+fee=0 always, unconditionally — no fee regime existed yet. For the OOS
+window (H1 2026), computed a fee-bearing share using ONLY
+markets.parquet's scheduling metadata (created_at, start_date,
+end_date_sched, resolution_ts, category, panel_eligible) — no price or
+outcome data read, keeping the OOS panel itself untouched at this stage:
+of 58,472 panel-eligible markets whose active window overlaps Jan-Jun
+2026, 58.7% are fee-bearing under the temporal rule (market-count
+weighted, not trade-weighted). Sports (68.4%) and Crypto (64.0%) drive
+this up; every other category sits at 24-32%. Not a small share — the
+fee-formula dispute (see src/strategy/costs.py's module docstring:
+Polymarket's documented p*(1-p) formula vs. its deployed contract's
+min(p,1-p)/p, which diverge sharply exactly at R1's tail trading points)
+therefore matters for the OOS cost accounting, not a second-order detail
+to wave through.
