@@ -1,0 +1,38 @@
+==================== W4a LIVE /book SAMPLING SPIKE ====================
+
+Live cross-section: 4000 open markets, volume_num >= 1000, pulled just now.
+vol_tercile computed within this whole sample (not within-category), matching build_panel.py's convention.
+
+category counts in the live sample:
+  Crypto         516
+  Culture        113
+  Econ/Finance   417
+  Geopolitics    379
+  Other          123
+  Politics       1899
+  Sports         553
+
+/book calls: 389 usable, 31 empty/missing/error (of 420 attempted)
+
+half-spread per (category, vol_tercile) stratum:
+  Crypto         t1  n=20   mean=0.0473  median=0.0230
+  Crypto         t2  n=20   mean=0.0121  median=0.0050
+  Crypto         t3  n=20   mean=0.0129  median=0.0050
+  Culture        t1  n=20   mean=0.0609  median=0.0375
+  Culture        t2  n=20   mean=0.0406  median=0.0175
+  Culture        t3  n=19   mean=0.0045  median=0.0005
+  Econ/Finance   t1  n=20   mean=0.0359  median=0.0080
+  Econ/Finance   t2  n=20   mean=0.0229  median=0.0097
+  Econ/Finance   t3  n=20   mean=0.0078  median=0.0050
+  Geopolitics    t1  n=17   mean=0.0202  median=0.0250
+  Geopolitics    t2  n=19   mean=0.0336  median=0.0200
+  Geopolitics    t3  n=19   mean=0.0067  median=0.0025
+  Other          t1  n=18   mean=0.0588  median=0.0145
+  Other          t2  n=18   mean=0.0479  median=0.0150
+  Other          t3  n=20   mean=0.0116  median=0.0075
+  Politics       t1  n=18   mean=0.0070  median=0.0050
+  Politics       t2  n=20   mean=0.0064  median=0.0050
+  Politics       t3  n=18   mean=0.0008  median=0.0005
+  Sports         t1  n=10   mean=0.0198  median=0.0050
+  Sports         t2  n=18   mean=0.0043  median=0.0013
+  Sports         t3  n=15   mean=0.0023  median=0.0010

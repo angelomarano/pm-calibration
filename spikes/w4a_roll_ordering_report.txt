@@ -1,0 +1,56 @@
+==================== W4a ROLL ORDERING CHECK ====================
+
+Roll undefined (non-negative first-order autocovariance of daily price changes): 35675/93370 (38.2%)
+
+Roll estimate per (category, vol_tercile) stratum (in-sample markets, daily bars):
+  Crypto         t1  n=701   mean=0.0679  median=0.0452
+  Crypto         t2  n=943   mean=0.0815  median=0.0467
+  Crypto         t3  n=1609  mean=0.0655  median=0.0381
+  Culture        t1  n=1106  mean=0.0590  median=0.0307
+  Culture        t2  n=1470  mean=0.0397  median=0.0207
+  Culture        t3  n=1966  mean=0.0349  median=0.0167
+  Econ/Finance   t1  n=1349  mean=0.0742  median=0.0524
+  Econ/Finance   t2  n=964   mean=0.0556  median=0.0344
+  Econ/Finance   t3  n=810   mean=0.0374  median=0.0210
+  Geopolitics    t1  n=566   mean=0.0730  median=0.0483
+  Geopolitics    t2  n=1107  mean=0.0642  median=0.0365
+  Geopolitics    t3  n=1412  mean=0.0589  median=0.0280
+  Other          t1  n=456   mean=0.0664  median=0.0361
+  Other          t2  n=504   mean=0.0552  median=0.0305
+  Other          t3  n=441   mean=0.0409  median=0.0243
+  Politics       t1  n=1521  mean=0.0686  median=0.0427
+  Politics       t2  n=1604  mean=0.0545  median=0.0290
+  Politics       t3  n=1896  mean=0.0340  median=0.0156
+  Sports         t1  n=13533 mean=0.0566  median=0.0373
+  Sports         t2  n=12639 mean=0.0550  median=0.0337
+  Sports         t3  n=11098 mean=0.0512  median=0.0286
+
+[ordinal comparison] ranking ALL (category, vol_tercile) strata present in both samples,
+  by median Roll estimate vs. median live half-spread (1=tightest ... N=widest):
+  Crypto         t1  roll_rank=18  book_rank=19   diff
+  Crypto         t2  roll_rank=19  book_rank=8    diff
+  Crypto         t3  roll_rank=16  book_rank=6    diff
+  Culture        t1  roll_rank=10  book_rank=21   diff
+  Culture        t2  roll_rank=3   book_rank=17   diff
+  Culture        t3  roll_rank=2   book_rank=2    MATCH
+  Econ/Finance   t1  roll_rank=21  book_rank=13   diff
+  Econ/Finance   t2  roll_rank=12  book_rank=14   diff
+  Econ/Finance   t3  roll_rank=4   book_rank=9    diff
+  Geopolitics    t1  roll_rank=20  book_rank=20   MATCH
+  Geopolitics    t2  roll_rank=14  book_rank=18   diff
+  Geopolitics    t3  roll_rank=6   book_rank=5    diff
+  Other          t1  roll_rank=13  book_rank=15   diff
+  Other          t2  roll_rank=9   book_rank=16   diff
+  Other          t3  roll_rank=5   book_rank=12   diff
+  Politics       t1  roll_rank=17  book_rank=10   diff
+  Politics       t2  roll_rank=8   book_rank=11   diff
+  Politics       t3  roll_rank=1   book_rank=1    MATCH
+  Sports         t1  roll_rank=15  book_rank=7    diff
+  Sports         t2  roll_rank=11  book_rank=4    diff
+  Sports         t3  roll_rank=7   book_rank=3    diff
+
+  exact rank matches: 3/21
+  Spearman rank correlation (Roll vs. live-book ordering): +0.391
+  Positive and large -> liquid strata are tighter in both samples, the retroactive
+  spread-band application is reasonable. Near zero or negative -> ordering does not
+  hold, and the bands in costs.py should be widened, per spec.
