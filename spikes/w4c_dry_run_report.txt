@@ -71,8 +71,11 @@ now exercising censoring/chronological-PnL/drawdown/annualized-return/break-even
     spread=1x               net(base fee)=-0.0053  net(upper fee)=-0.0053
     spread=2x               net(base fee)=-0.0081  net(upper fee)=-0.0081
 
-[7] per-trade gross_pnl distribution:
-  win_rate=0.969  p5=0.0209  median=0.0510  p95=0.1050
+[7] per-trade gross_pnl distribution (win/loss reported separately -- see module docstring note):
+  wins:   n=14439  (96.9%)  mean=+0.0563  total_contribution=+812.73
+  losses: n=459    (3.1%)  mean=-1.0000  total_contribution=-459.00
+  distinct loss values: [-1.0] (sanity check: a loss always means payout=0 regardless of entry price, so gross_pnl must be exactly -1.0 on every loss -- confirmed, not assumed)
+  full-sample quantiles for reference: min=-1.0000  p1=-1.0000  p5=0.0209  median=0.0510  p95=0.1050
 
 [8] chronological PnL (net, 1x band, base fee): final cumulative=+64.43  max_drawdown=16.85
 
