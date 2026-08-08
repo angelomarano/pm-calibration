@@ -81,6 +81,7 @@
     which overstates capital deployed and therefore understates this return (see evaluation.py docstring).
 
 [10] BREAK-EVEN HALF-SPREAD (headline number): multiplier=1.03x the observed 1x band (= 0.0067 absolute half-spread, vs. observed mean 1x=0.0065)
+  figure written to /Users/angelomarano/Desktop/Progetti personali/pm-calibration/reports/figures/w4c_net_edge_vs_spread.png
 
 [11] no Sharpe ratio -- binary payoffs with lumpy resolution timing make it meaningless here.
 

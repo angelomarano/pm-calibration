@@ -32,6 +32,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 import numpy as np
 import polars as pl
 
@@ -55,6 +59,7 @@ P1_PATH = Path("data/panel/p1.parquet")
 # not assumed.
 DATA_COLLECTION_CUTOFF = datetime(2026, 7, 12, tzinfo=timezone.utc)
 BOOK_SUMMARY_PATH = Path(__file__).resolve().parent / "w4a_book_sample_summary.csv"
+FIGURE_PATH = Path(__file__).resolve().parent.parent / "reports" / "figures" / "w4c_net_edge_vs_spread.png"
 
 # Frozen 2026-08-08 in W4b (commit 7e23fed, spikes/w4b_dry_run_report.txt).
 # NOT recomputed here -- see module docstring.
@@ -75,6 +80,47 @@ def _report_block(L: list[str], df: pl.DataFrame, title: str) -> None:
         net_base = _net_edge(df, "fee_base", mult)
         net_upper = _net_edge(df, "fee_upper", mult)
         L.append(f"    spread={label:<16} net(base fee)={net_base:+.4f}  net(upper fee)={net_upper:+.4f}")
+
+
+def _plot_net_edge_vs_spread(result: pl.DataFrame, be_mult: float, mean_half_spread: float) -> None:
+    """net(m) = mean(gross - fee - carry) - m * mean(half_spread) -- linear in the spread
+    band multiplier m, since spread_half is fixed per position and only its multiplier
+    varies. Plotted continuously (not just the three discrete bands) so a reader can see
+    exactly where break-even falls and how sharply net edge moves either side of it."""
+    base_edge_net_of_fee_carry = float((result["gross_pnl"] - result["fee_base"] - result["carry"]).mean())
+    upper_edge_net_of_fee_carry = float((result["gross_pnl"] - result["fee_upper"] - result["carry"]).mean())
+
+    m = np.linspace(0, 2.5, 200)
+    net_base = base_edge_net_of_fee_carry - m * mean_half_spread
+    net_upper = upper_edge_net_of_fee_carry - m * mean_half_spread
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(m, net_base, label="net edge, base fee", color="tab:blue", linewidth=2)
+    ax.plot(m, net_upper, label="net edge, upper fee", color="tab:orange", linewidth=2)
+    ax.axhline(0.0, color="gray", linestyle="--", linewidth=1)
+
+    ax.axvline(be_mult, color="black", linestyle=":", linewidth=1.5)
+    ax.annotate(
+        f"break-even {be_mult:.2f}x\n(half-spread={be_mult*mean_half_spread:.4f})",
+        xy=(be_mult, 0.0),
+        xytext=(be_mult + 0.15, max(net_base.max(), net_upper.max()) * 0.6),
+        arrowprops=dict(arrowstyle="->", color="black"),
+        fontsize=9,
+    )
+
+    y_top = ax.get_ylim()[1]
+    for label, mult in [("0.5x", 0.5), ("1x", 1.0), ("2x", 2.0)]:
+        ax.axvline(mult, color="lightgray", linestyle="-", linewidth=1, zorder=0)
+        ax.text(mult, y_top, label, ha="center", va="bottom", fontsize=8, color="dimgray")
+
+    ax.set_xlabel("spread band multiplier")
+    ax.set_ylabel("mean net edge per trade")
+    ax.set_title(f"R1 OOS net edge vs. spread band multiplier\nH1 2026, n={result.height} positions")
+    ax.legend(loc="lower left")
+    fig.tight_layout()
+    FIGURE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(FIGURE_PATH, dpi=150)
+    plt.close(fig)
 
 
 def main():
@@ -245,6 +291,10 @@ def main():
         f"\n[10] BREAK-EVEN HALF-SPREAD (headline number): multiplier={be_mult:.2f}x the observed 1x band "
         f"(= {be_mult*mean_half_spread:.4f} absolute half-spread, vs. observed mean 1x={mean_half_spread:.4f})"
     )
+
+    if not args.dry_run:
+        _plot_net_edge_vs_spread(result, be_mult, mean_half_spread)
+        L.append(f"  figure written to {FIGURE_PATH}")
 
     L.append("\n[11] no Sharpe ratio -- binary payoffs with lumpy resolution timing make it meaningless here.")
 
