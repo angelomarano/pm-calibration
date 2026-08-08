@@ -1,0 +1,65 @@
+==================== W4b R1 DRY RUN (IN-SAMPLE MECHANICS CHECK) ====================
+
+NOT A RESULT -- circular by construction: the leg direction below was read from
+the very rows this report then trades, so any apparent edge partly reflects the
+map fit on this same data, not an out-of-sample test. That test is W4c.
+
+[1] direction, read once from the pooled ex-Sports in-sample calibration map:
+  longshot [0.02,0.10]: mean_p=0.0531 mean_y=0.0264 -> direction='buy_no'
+  favorite [0.90,0.98]: mean_p=0.9415 mean_y=0.9704 -> direction='buy_yes'
+
+[2] positions generated (ALL categories, including Sports -- the rule is pooled, not per-category): 14903
+
+[3] POOLED headline (all categories, both legs combined):
+  mean gross edge = +0.0237  95% CI (mechanics check, NOT a result) [+0.0192, +0.0282]  n_valid=2000
+  spread=0.5x (optimistic) net(base fee)=+0.0082  net(upper fee)=+0.0082
+  spread=1x               net(base fee)=+0.0043  net(upper fee)=+0.0043
+  spread=2x               net(base fee)=-0.0035  net(upper fee)=-0.0035
+
+[4] per-category breakdown (descriptive breakdown of the single frozen pooled rule -- NOT a per-category rule):
+  Crypto         n=1117   gross_edge=+0.0354
+      spread=0.5x (optimistic) net(base fee)=+0.0211  net(upper fee)=+0.0211
+      spread=1x               net(base fee)=+0.0157  net(upper fee)=+0.0157
+      spread=2x               net(base fee)=+0.0051  net(upper fee)=+0.0051
+  Culture        n=1586   gross_edge=+0.0195
+      spread=0.5x (optimistic) net(base fee)=+0.0003  net(upper fee)=+0.0003
+      spread=1x               net(base fee)=-0.0107  net(upper fee)=-0.0107
+      spread=2x               net(base fee)=-0.0328  net(upper fee)=-0.0328
+  Econ/Finance   n=1583   gross_edge=+0.0409
+      spread=0.5x (optimistic) net(base fee)=+0.0251  net(upper fee)=+0.0251
+      spread=1x               net(base fee)=+0.0212  net(upper fee)=+0.0212
+      spread=2x               net(base fee)=+0.0136  net(upper fee)=+0.0136
+  Geopolitics    n=1478   gross_edge=+0.0465
+      spread=0.5x (optimistic) net(base fee)=+0.0289  net(upper fee)=+0.0289
+      spread=1x               net(base fee)=+0.0212  net(upper fee)=+0.0212
+      spread=2x               net(base fee)=+0.0060  net(upper fee)=+0.0060
+  Other          n=531    gross_edge=+0.0290
+      spread=0.5x (optimistic) net(base fee)=+0.0123  net(upper fee)=+0.0123
+      spread=1x               net(base fee)=+0.0056  net(upper fee)=+0.0056
+      spread=2x               net(base fee)=-0.0077  net(upper fee)=-0.0077
+  Politics       n=4442   gross_edge=+0.0201
+      spread=0.5x (optimistic) net(base fee)=+0.0058  net(upper fee)=+0.0058
+      spread=1x               net(base fee)=+0.0040  net(upper fee)=+0.0040
+      spread=2x               net(base fee)=+0.0004  net(upper fee)=+0.0004
+  Sports         n=4166   gross_edge=+0.0109
+      spread=0.5x (optimistic) net(base fee)=-0.0039  net(upper fee)=-0.0039
+      spread=1x               net(base fee)=-0.0053  net(upper fee)=-0.0053
+      spread=2x               net(base fee)=-0.0081  net(upper fee)=-0.0081
+
+[5] per-leg breakdown (longshot vs favorite) (descriptive breakdown of the single frozen pooled rule -- NOT a per-leg rule):
+  favorite       n=1461   gross_edge=+0.0282
+      spread=0.5x (optimistic) net(base fee)=+0.0158  net(upper fee)=+0.0158
+      spread=1x               net(base fee)=+0.0125  net(upper fee)=+0.0125
+      spread=2x               net(base fee)=+0.0057  net(upper fee)=+0.0057
+  longshot       n=13442  gross_edge=+0.0233
+      spread=0.5x (optimistic) net(base fee)=+0.0074  net(upper fee)=+0.0074
+      spread=1x               net(base fee)=+0.0034  net(upper fee)=+0.0034
+      spread=2x               net(base fee)=-0.0045  net(upper fee)=-0.0045
+
+  dropped-row accounting (W2's exclusion, for reference): {'loaded': 52388, 'dropped_null_y': 78, 'dropped_ambiguous': 78, 'dropped_total': 78, 'kept': 52310}
+
+NOT A RESULT -- circular by construction: the leg direction below was read from
+the very rows this report then trades, so any apparent edge partly reflects the
+map fit on this same data, not an out-of-sample test. That test is W4c.
+
+====================================================================
