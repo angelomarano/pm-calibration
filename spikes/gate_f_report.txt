@@ -1,0 +1,77 @@
+====================== GATE F REPORT -- W4 AND PROJECT CLOSE-OUT ======================
+
+[0] SUMMARY OF RECORD
+  Gross edge is real: +0.0124/trade, 95% CI [+0.0062, +0.0178], excludes zero.
+  Net edge at the realistic 1x cost band is approximately zero: +0.0002 (base fee) / -0.0006 (upper fee). At 2x it is negative (-0.0063).
+  Calibration: beta moved from 1.165 (in-sample) to 1.077 (OOS), CIs overlapping only in a narrow band [1.116, 1.133] (width 0.017). The OOS CI [1.027, 1.133] still excludes 1.0.
+
+  Of the four outcomes named in advance (§3): persists and tradeable / persists but not net of
+  costs / decayed / never robust -- this combination (statistically significant gross edge,
+  breakeven-ish net edge, beta still excluding 1.0 OOS but smaller than in-sample) is READ HERE
+  as 'persists but not net of costs, with partial decay.' Not 'never robust' (gross edge is
+  significant); not fully 'decayed' (OOS beta still excludes 1.0); not 'tradeable' (net edge at
+  the realistic band does not clear zero with any margin).
+
+  Break-even = 1.03x the observed 1x spread band. This is not a near-miss -- it is a measurement
+  of how precisely this market prices its own frictions: the gross mispricing and the cost of
+  capturing it are approximately the same size. That is the limits-to-arbitrage signature, and
+  it is this project's actual finding, not an inconclusive result.
+
+  Adversarial-review clause (§3): a LARGE POSITIVE net edge (net of costs, at a realistic band)
+  would have required an adversarial pipeline review before any celebration, since free money in
+  a public market is more likely a bug or a look-ahead leak than a genuine inefficiency. That did
+  NOT happen here -- no band shows a large positive net edge. Stating this explicitly so the
+  safeguard reads as correctly not invoked, not forgotten.
+
+  What this result does NOT establish:
+  - This is one frozen rule with fixed thresholds, not a search over rules. A different entry
+    band, a liquidity filter, or a category-conditional rule might behave differently -- untested
+    here by design, since testing them would have required the tuning freedom the
+    pre-registration deliberately gave up.
+  - The spread assumption is contemporary live books applied retroactively (W4a; Spearman +0.391
+    ordinal support -- modest, not strong). Break-even sits at 1.03x the assumed band, close
+    enough that a materially different true spread would flip the sign of the net edge. That is
+    exactly why break-even is reported as the headline number rather than the net edge itself.
+  - Six months of OOS on one venue. Not a claim about prediction markets generally, and not a
+    claim about periods under a different fee regime than the one investigated in W4a.
+
+[1] persistence (formal comparison):
+  in-sample beta=1.1653 CI=[1.1157, 1.2235]
+  OOS beta=1.0766 CI=[1.0266, 1.1328]
+  overlap interval: [1.1157, 1.1328] (overlap)
+
+[2] does R1 produce positive net edge under any spread band?
+  spread=0.5x (optimistic) net(base fee)=+0.0034 (YES)  net(upper fee)=+0.0027 (YES)
+  spread=1x               net(base fee)=+0.0002 (YES)  net(upper fee)=-0.0006 (no)
+  spread=2x               net(base fee)=-0.0063 (no)  net(upper fee)=-0.0071 (no)
+  BREAK-EVEN HALF-SPREAD (headline): multiplier=1.03x the observed 1x band (= 0.0067 absolute)
+
+[3] censoring representativeness: 19/7742 excluded (0.2%)
+    Crypto         excluded_share=0.0%
+    Culture        excluded_share=0.0%
+    Econ/Finance   excluded_share=0.0%
+    Geopolitics    excluded_share=0.0%
+    Other          excluded_share=0.0%
+    Politics       excluded_share=0.2%
+    Sports         excluded_share=0.5%
+    kept:     n=7723  mean_days_to_resolution=47.7
+    excluded: n=19  mean_days_to_resolution=76.5
+  VERDICT: 0.2% excluded is negligible at this sample size; despite the
+  excluded set skewing toward longer-dated markets, the usable OOS sample is representative --
+  this restriction is a rounding error, not a different population (contrast W3a's ran-to-term
+  restriction, which dropped 22-60% and was a different population).
+
+[4] hard assertions (already checked above -- the script would have halted before this line otherwise):
+  W4b in-sample dry run reproduces exactly: mean_gross_edge=0.023748425387751 -- PASS
+  OOS calibration cell reproduces exactly: beta=1.076646960840913 -- PASS
+
+[5] Geopolitics: n=927, gross_edge=+0.0331, net(2x, base fee)=+0.0054
+  The only category positive net of costs at every band, and the only fee-exempt category.
+  Reported as a curiosity, not a finding: one category out of seven, identified post-hoc, n=927,
+  no multiplicity correction applied. Consistent with a real effect, equally consistent with
+  chance given seven categories were looked at.
+
+====================================================================
+EXIT VERDICT
+  both hard assertions PASS -- Gate F closes, W4 and the project's planned arc close with it.
+====================================================================
