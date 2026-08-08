@@ -131,7 +131,21 @@ def attach_costs_and_pnl(
     idiom for exactly this forward-fill (see build_panel.py's price
     attachment), including the lesson already paid for once: both sides
     must be explicitly sorted first, since join_asof on unsorted input
-    gives silently wrong matches, not an error."""
+    gives silently wrong matches, not an error.
+
+    Hard precondition: `won` must never be null. A null y (unresolved or
+    excluded outcome) makes the `won` column null, and `if row["won"]:`
+    below treats Python None as falsy -- silently scoring an unresolved
+    position as a guaranteed loss. Caught once (2026-08-08, see
+    DECISIONS.md) when a caller forgot the null-y/resolution_ambiguous
+    drop that load_calibration_frame() applies everywhere else; asserted
+    here so a future caller gets a loud crash instead of a silently
+    wrong number."""
+    assert positions["won"].null_count() == 0, (
+        f"{positions['won'].null_count()} position(s) have won=null (from null y) -- drop null-y/"
+        "resolution_ambiguous rows before calling attach_costs_and_pnl, same as "
+        "load_calibration_frame() does."
+    )
     joined = positions.join(created_at_by_market, on="market_id", how="left")
     joined = joined.with_columns(pl.col("snapshot_date").dt.date().alias("_snapshot_date_only"))
     # drop null observations (holidays) BEFORE the asof join, same as rate_on -- otherwise

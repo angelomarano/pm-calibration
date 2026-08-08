@@ -257,3 +257,38 @@ snapshot's own low p. Whoever wires fee_cost into R1's mechanics must
 pass the price of the token actually bought, not the panel's raw p
 column, or the longshot leg's fee will be computed at the wrong end of
 the price range.
+
+2026-08-08 — W4c OOS unlock (commit 8686595) and a bug caught on the
+first real run, before drawing any conclusions from it. w4c_oos_result.py's
+real-run branch called load_panel(..., allow_oos=True) directly instead of
+going through load_calibration_frame(), so it never dropped the null-y /
+resolution_ambiguous rows that every other calibration/strategy use in
+this project drops (78 in-sample, 27 OOS rows). Consequence: a null y
+makes build_r1_positions' `won` column null, and `if row["won"]:` in
+attach_costs_and_pnl treats Python None as falsy — silently scoring an
+unresolved position as a guaranteed loss. Quantified before fixing: 3 of
+7,726 OOS positions (all one Culture market) were affected — small in
+count, but it also produced a visibly wrong signal that made the bug easy
+to catch: calibration_stat_fn's full-sample (non-resampled) fit returned
+beta=nan for both in-sample and OOS in the persistence-check section,
+since the IRLS fit chokes on null y propagating through the arithmetic.
+
+Fixed two ways: (1) w4c_oos_result.py's real-run branch now applies the
+same independent-count null-y/resolution_ambiguous drop
+load_calibration_frame() uses, reporting dropped_null_y/dropped_ambiguous
+counts same as everywhere else; (2) attach_costs_and_pnl now hard-asserts
+`won`.null_count()==0 before doing anything else, converting this failure
+mode into a loud crash for any future caller, not just this one script —
+same discipline as Gate E's W2d reconciliation assertion. Regression test
+added (test_attach_costs_and_pnl_rejects_null_won_loudly).
+
+Corrected re-run: beta=nan resolved to real values (in-sample beta=1.165,
+matching W2d's headline exactly; OOS beta=1.077), and the 3 affected
+positions' removal shifted the headline numbers by less than 0.001 in
+every reported band — the bug was real and worth fixing on principle
+(silent wrong answers are not acceptable regardless of size), but not
+large enough to have changed any qualitative reading of the result.
+
+Also updated two stale tests that asserted the pre-unlock lock state
+(test_load_spec_config_real_file, test_load_panel_real_p1_parquet_integration_check)
+to reflect that config/spec.yaml's oos_locked is now false, per the W4c unlock.

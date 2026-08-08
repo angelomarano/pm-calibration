@@ -32,7 +32,7 @@ def test_load_spec_config_real_file():
     assert config.p2_horizons_days == [7, 30]
     assert config.staleness_max_hours == 72.0
     assert config.price_clip == (0.01, 0.99)
-    assert config.oos_locked is True
+    assert config.oos_locked is False  # unlocked 2026-08-08 (commit 8686595), W4c
     assert config.oos_boundary == dt.datetime(2026, 1, 1, tzinfo=dt.timezone.utc)
 
 

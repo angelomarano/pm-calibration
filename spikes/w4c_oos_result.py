@@ -97,9 +97,25 @@ def main():
         in_sample = df
     else:
         full = load_panel(P1_PATH, allow_oos=True)
-        drop_stats = {"note": "load_panel(allow_oos=True) does not drop rows; full panel returned"}
-        in_sample = full.filter(~pl.col("is_oos"))
-        df = full.filter(pl.col("is_oos"))
+        # load_panel does not drop the null-y / resolution_ambiguous rows that
+        # load_calibration_frame() drops everywhere else in this project (docs/M3_SPEC_ADDENDUM.md
+        # §3: deliberately kept in the panel, but must exit before any calibration/strategy use).
+        # Counted independently, not sequentially -- same convention as load_calibration_frame,
+        # since a future change breaking their coincidence should still be caught, not silently
+        # under-counted. Missing this the first time silently scored 3 real OOS positions (all one
+        # Culture market, null y) as guaranteed losses, since `if row["won"]:` treats a null/None
+        # won value as falsy -- see 2026-08-08 DECISIONS.md.
+        dropped_null_y = full.filter(pl.col("y").is_null()).height
+        dropped_ambiguous = full.filter(pl.col("resolution_ambiguous")).height
+        clean = full.filter(pl.col("y").is_not_null() & ~pl.col("resolution_ambiguous"))
+        drop_stats = {
+            "loaded": full.height,
+            "dropped_null_y": dropped_null_y,
+            "dropped_ambiguous": dropped_ambiguous,
+            "kept": clean.height,
+        }
+        in_sample = clean.filter(~pl.col("is_oos"))
+        df = clean.filter(pl.col("is_oos"))
 
     # --- reproducibility assertion: frozen directions must still match on IN-SAMPLE data ---
     recomputed_longshot = leg_direction_from_calibration_map(in_sample.filter(pl.col("category") != "Sports"), 0.02, 0.10)

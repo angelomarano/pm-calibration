@@ -61,11 +61,15 @@ REAL_P1_PATH = Path("data/panel/p1.parquet")
 @pytest.mark.skipif(not REAL_P1_PATH.exists(), reason="data/panel/p1.parquet not built in this environment")
 def test_load_panel_real_p1_parquet_integration_check():
     """The real-data check: confirms load_panel's default matches today's
-    is_oos=False count exactly, and that allow_oos=True still raises since
-    the real config/spec.yaml has oos_locked=true."""
+    is_oos=False count exactly regardless of lock state, and that
+    allow_oos=True's behavior matches the real config/spec.yaml's
+    oos_locked value -- unlocked 2026-08-08 (commit 8686595, W4c), so
+    allow_oos=True now returns the full panel rather than raising."""
     df = load_panel(REAL_P1_PATH)
     assert df.height == 52388
     assert df["is_oos"].any() == False  # noqa: E712 (explicit False check reads clearer here)
 
-    with pytest.raises(RuntimeError, match="oos_locked"):
-        load_panel(REAL_P1_PATH, allow_oos=True)
+    full = load_panel(REAL_P1_PATH, allow_oos=True)
+    assert full.height == 95899
+    assert full.filter(~pl.col("is_oos")).height == 52388
+    assert full.filter(pl.col("is_oos")).height == 43511

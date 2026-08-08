@@ -1,0 +1,94 @@
+==================== W4c OOS RESULT ====================
+
+[0] frozen-rule reproducibility: longshot='buy_no', favorite='buy_yes' -- PASS
+
+[1] positions generated (pre-censoring): 7742
+
+[2] censoring (cutoff=2026-07-12): 19/7742 excluded (0.2%)
+    Crypto         excluded_share=0.0%
+    Culture        excluded_share=0.0%
+    Econ/Finance   excluded_share=0.0%
+    Geopolitics    excluded_share=0.0%
+    Other          excluded_share=0.0%
+    Politics       excluded_share=0.2%
+    Sports         excluded_share=0.5%
+    kept profile:     n=7723  mean_days_to_resolution=47.7
+    excluded profile: n=19  mean_days_to_resolution=76.5
+
+[3] POOLED (n=7723, dominated by the longshot leg -- see [4]/[5] for the split, not an appendix):
+  mean gross edge = +0.0124  95% CI [+0.0062, +0.0178]
+    spread=0.5x (optimistic) net(base fee)=+0.0034  net(upper fee)=+0.0027
+    spread=1x               net(base fee)=+0.0002  net(upper fee)=-0.0006
+    spread=2x               net(base fee)=-0.0063  net(upper fee)=-0.0071
+
+[4] LONGSHOT leg (full prominence, not a sub-breakdown): n=6916  gross_edge=+0.0134
+    spread=0.5x (optimistic) net(base fee)=+0.0043  net(upper fee)=+0.0035
+    spread=1x               net(base fee)=+0.0011  net(upper fee)=+0.0003
+    spread=2x               net(base fee)=-0.0053  net(upper fee)=-0.0061
+
+[5] FAVORITE leg (full prominence, not a sub-breakdown): n=807  gross_edge=+0.0037
+    spread=0.5x (optimistic) net(base fee)=-0.0039  net(upper fee)=-0.0045
+    spread=1x               net(base fee)=-0.0076  net(upper fee)=-0.0082
+    spread=2x               net(base fee)=-0.0150  net(upper fee)=-0.0156
+
+[6] per-category breakdown (descriptive, single frozen pooled rule -- NOT a per-category rule):
+
+    Crypto: n=323  gross_edge=-0.0101
+    spread=0.5x (optimistic) net(base fee)=-0.0208  net(upper fee)=-0.0206
+    spread=1x               net(base fee)=-0.0257  net(upper fee)=-0.0255
+    spread=2x               net(base fee)=-0.0354  net(upper fee)=-0.0352
+
+    Culture: n=747  gross_edge=+0.0151
+    spread=0.5x (optimistic) net(base fee)=+0.0025  net(upper fee)=+0.0022
+    spread=1x               net(base fee)=-0.0060  net(upper fee)=-0.0062
+    spread=2x               net(base fee)=-0.0229  net(upper fee)=-0.0231
+
+    Econ/Finance: n=959  gross_edge=+0.0050
+    spread=0.5x (optimistic) net(base fee)=-0.0047  net(upper fee)=-0.0050
+    spread=1x               net(base fee)=-0.0085  net(upper fee)=-0.0088
+    spread=2x               net(base fee)=-0.0162  net(upper fee)=-0.0165
+
+    Geopolitics: n=927  gross_edge=+0.0331
+    spread=0.5x (optimistic) net(base fee)=+0.0225  net(upper fee)=+0.0224
+    spread=1x               net(base fee)=+0.0168  net(upper fee)=+0.0167
+    spread=2x               net(base fee)=+0.0054  net(upper fee)=+0.0052
+
+    Other: n=428  gross_edge=-0.0058
+    spread=0.5x (optimistic) net(base fee)=-0.0185  net(upper fee)=-0.0187
+    spread=1x               net(base fee)=-0.0248  net(upper fee)=-0.0251
+    spread=2x               net(base fee)=-0.0375  net(upper fee)=-0.0378
+
+    Politics: n=1210  gross_edge=+0.0105
+    spread=0.5x (optimistic) net(base fee)=+0.0021  net(upper fee)=+0.0018
+    spread=1x               net(base fee)=+0.0002  net(upper fee)=-0.0000
+    spread=2x               net(base fee)=-0.0036  net(upper fee)=-0.0038
+
+    Sports: n=3129  gross_edge=+0.0133
+    spread=0.5x (optimistic) net(base fee)=+0.0065  net(upper fee)=+0.0049
+    spread=1x               net(base fee)=+0.0055  net(upper fee)=+0.0039
+    spread=2x               net(base fee)=+0.0034  net(upper fee)=+0.0017
+
+[7] per-trade gross_pnl distribution (win/loss reported separately -- see module docstring note):
+  wins:   n=7389   (95.7%)  mean=+0.0581  total_contribution=+429.46
+  losses: n=334    (4.3%)  mean=-1.0000  total_contribution=-334.00
+  distinct loss values: [-1.0] (sanity check: a loss always means payout=0 regardless of entry price, so gross_pnl must be exactly -1.0 on every loss -- confirmed, not assumed)
+  full-sample quantiles for reference: min=-1.0000  p1=-1.0000  p5=0.0204  median=0.0526  p95=0.1050
+
+[8] chronological PnL (net, 1x band, base fee): final cumulative=+1.36  max_drawdown=23.44
+
+[9] annualized return (net, 1x band, base fee): +0.0004 -- CONSERVATIVE LOWER BOUND:
+    capital_deployed sums notional across all 7723 trades without netting time-overlap,
+    which overstates capital deployed and therefore understates this return (see evaluation.py docstring).
+
+[10] BREAK-EVEN HALF-SPREAD (headline number): multiplier=1.03x the observed 1x band (= 0.0067 absolute half-spread, vs. observed mean 1x=0.0065)
+
+[11] no Sharpe ratio -- binary payoffs with lumpy resolution timing make it meaningless here.
+
+[12] OOS calibration persistence (separate from the strategy result):
+  in-sample beta=1.165 CI=[1.116, 1.224]
+  OOS beta=1.077 CI=[1.027, 1.133]
+  CIs overlap: True -- miscalibration persists
+
+  dropped-row / panel accounting: {'loaded': 95899, 'dropped_null_y': 105, 'dropped_ambiguous': 105, 'kept': 95794}
+
+====================================================================

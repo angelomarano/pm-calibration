@@ -188,3 +188,17 @@ def test_attach_costs_and_pnl_missing_spread_stratum_is_null_not_crash():
     positions = build_r1_positions(df, longshot_direction="buy_no", favorite_direction=None)
     result = attach_costs_and_pnl(positions, created_at_by_market, _fixture_rates(), spread_lookup={})
     assert result.row(0, named=True)["spread_half"] is None
+
+
+def test_attach_costs_and_pnl_rejects_null_won_loudly():
+    """Regression test for the 2026-08-08 bug: a null y (unresolved /
+    excluded outcome, e.g. resolution_ambiguous) makes `won` null, and
+    `if row["won"]:` would silently treat that as a loss. Must raise
+    instead -- callers are required to drop null-y rows first, same as
+    load_calibration_frame() does everywhere else."""
+    created_at_by_market = pl.DataFrame({"market_id": ["m1"], "created_at": [datetime(2024, 1, 1, tzinfo=timezone.utc)]})
+    df = pl.DataFrame([_row(market_id="m1", p=0.05, y=None)])
+    positions = build_r1_positions(df, longshot_direction="buy_no", favorite_direction=None)
+    assert positions["won"].null_count() == 1  # confirms the precondition this test exercises
+    with pytest.raises(AssertionError):
+        attach_costs_and_pnl(positions, created_at_by_market, _fixture_rates(), spread_lookup={})
